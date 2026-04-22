@@ -1,0 +1,37 @@
+uploads = []
+
+[[generated]]
+id = "qF7C7bDEWaaFGHuM4c9m_"
+uri = "file://artifacts/peace/public/seed/calm-tee-cream.png"
+type = "image"
+title = "calm tee cream"
+
+[[generated]]
+id = "2oGwiMe9w9sP99XXHCCj2"
+uri = "file://artifacts/peace/public/seed/calm-tee-sage.png"
+type = "image"
+title = "calm tee sage"
+
+[[generated]]
+id = "vEH9hDc_64rSmT4mv8gYP"
+uri = "file://artifacts/peace/public/seed/intent-hoodie.png"
+type = "image"
+title = "intent hoodie"
+
+[[generated]]
+id = "9yEn0fmF2ZRVDeE_9a3gD"
+uri = "file://artifacts/peace/public/seed/stillness-pants.png"
+type = "image"
+title = "stillness pants"
+
+[[generated]]
+id = "XSD0oNHh04GpVoVtUi60k"
+uri = "file://artifacts/peace/public/seed/quiet-beanie.png"
+type = "image"
+title = "quiet beanie"
+
+[[outputs]]
+id = "wgtGjNJww_9aRTp804Vmu"
+uri = "file://artifacts/peace/public/hero.jpg"
+type = "image"
+title = "calm minimal aesthetic fashion lifestyle clean serene"

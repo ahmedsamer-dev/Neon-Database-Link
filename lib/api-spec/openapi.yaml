@@ -1,22 +1,23 @@
 openapi: 3.1.0
 info:
-  # Do not change the title, if the title changes, the import paths will be broken
   title: Api
   version: 0.1.0
-  description: API specification
+  description: Peace clothing brand e-commerce API
 servers:
   - url: /api
     description: Base API path
 tags:
   - name: health
-    description: Health operations
+  - name: products
+  - name: orders
+  - name: admin
+  - name: notifications
 paths:
   /healthz:
     get:
       operationId: healthCheck
       tags: [health]
       summary: Health check
-      description: Returns server health status
       responses:
         "200":
           description: Healthy
@@ -24,13 +25,435 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+
+  /products:
+    get:
+      operationId: listProducts
+      tags: [products]
+      summary: List active products
+      responses:
+        "200":
+          description: List of products
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Product"
+
+  /products/{id}:
+    get:
+      operationId: getProduct
+      tags: [products]
+      summary: Get a product with variants
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: A product
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: Not found
+
+  /orders:
+    post:
+      operationId: createOrder
+      tags: [orders]
+      summary: Create a new order (payment pending, stock not reduced)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateOrderInput"
+      responses:
+        "201":
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Validation error
+
+  /admin/login:
+    post:
+      operationId: adminLogin
+      tags: [admin]
+      summary: Admin login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Logged in
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [token]
+                properties:
+                  token:
+                    type: string
+        "401":
+          description: Invalid credentials
+
+  /admin/orders:
+    get:
+      operationId: listOrders
+      tags: [admin]
+      summary: List all orders (admin)
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Order"
+
+  /admin/orders/{id}:
+    get:
+      operationId: getOrder
+      tags: [admin]
+      summary: Get order detail with items
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Order
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /admin/orders/{id}/confirm-payment:
+    post:
+      operationId: confirmPayment
+      tags: [admin]
+      summary: Confirm payment for an order; reduces stock
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+      responses:
+        "200":
+          description: Confirmed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        "400":
+          description: Stock unavailable
+        "401":
+          description: Unauthorized
+
+  /admin/orders/{id}/status:
+    put:
+      operationId: updateOrderStatus
+      tags: [admin]
+      summary: Update order shipping status
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status, token]
+              properties:
+                status:
+                  type: string
+                  enum: [Pending, Shipped, Delivered, Cancelled]
+                token:
+                  type: string
+      responses:
+        "200":
+          description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+
+  /admin/notifications:
+    get:
+      operationId: listNotifications
+      tags: [notifications]
+      summary: List admin notifications
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Notifications
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Notification"
+
+  /admin/notifications/{id}/read:
+    post:
+      operationId: markNotificationRead
+      tags: [notifications]
+      summary: Mark notification as read
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties:
+                token:
+                  type: string
+      responses:
+        "200":
+          description: OK
+
+  /admin/stats:
+    get:
+      operationId: getAdminStats
+      tags: [admin]
+      summary: Dashboard stats
+      parameters:
+        - name: token
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdminStats"
+
 components:
   schemas:
     HealthStatus:
       type: object
+      required: [status]
       properties:
         status:
           type: string
-      required:
-        - status
 
+    Variant:
+      type: object
+      required: [id, productId, size, color, price, stock]
+      properties:
+        id:
+          type: string
+        productId:
+          type: string
+        size:
+          type: string
+        color:
+          type: string
+        price:
+          type: number
+        stock:
+          type: integer
+
+    Product:
+      type: object
+      required: [id, name, description, basePrice, isActive, images, variants]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        basePrice:
+          type: number
+        isActive:
+          type: boolean
+        images:
+          type: array
+          items:
+            type: string
+        variants:
+          type: array
+          items:
+            $ref: "#/components/schemas/Variant"
+
+    OrderItemInput:
+      type: object
+      required: [variantId, quantity]
+      properties:
+        variantId:
+          type: string
+        quantity:
+          type: integer
+          minimum: 1
+
+    CreateOrderInput:
+      type: object
+      required: [customerName, phone, paymentPhone, address, city, items]
+      properties:
+        customerName:
+          type: string
+          minLength: 3
+        phone:
+          type: string
+          minLength: 6
+        paymentPhone:
+          type: string
+          minLength: 6
+        address:
+          type: string
+          minLength: 10
+        city:
+          type: string
+          minLength: 2
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: "#/components/schemas/OrderItemInput"
+
+    OrderItem:
+      type: object
+      required: [id, orderId, productName, size, color, quantity, price]
+      properties:
+        id:
+          type: string
+        orderId:
+          type: string
+        productName:
+          type: string
+        size:
+          type: string
+        color:
+          type: string
+        quantity:
+          type: integer
+        price:
+          type: number
+
+    Order:
+      type: object
+      required: [id, customerName, phone, paymentPhone, address, city, totalAmount, paymentStatus, orderStatus, createdAt, items]
+      properties:
+        id:
+          type: string
+        customerName:
+          type: string
+        phone:
+          type: string
+        paymentPhone:
+          type: string
+        address:
+          type: string
+        city:
+          type: string
+        totalAmount:
+          type: number
+        paymentStatus:
+          type: string
+          enum: [Pending, Paid]
+        orderStatus:
+          type: string
+          enum: [Pending, Shipped, Delivered, Cancelled]
+        createdAt:
+          type: string
+          format: date-time
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OrderItem"
+
+    Notification:
+      type: object
+      required: [id, type, message, isRead, createdAt]
+      properties:
+        id:
+          type: string
+        type:
+          type: string
+          enum: [NewOrder, PaymentReceived]
+        message:
+          type: string
+        isRead:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    AdminStats:
+      type: object
+      required: [total, pending, paid, shipped, delivered, unreadNotifications]
+      properties:
+        total:
+          type: integer
+        pending:
+          type: integer
+        paid:
+          type: integer
+        shipped:
+          type: integer
+        delivered:
+          type: integer
+        unreadNotifications:
+          type: integer

@@ -1,20 +1,71 @@
-// Export your models here. Add one export per file
-// export * from "./posts";
-//
-// Each model/table should ideally be split into different files.
-// Each model/table should define a Drizzle table, insert schema, and types:
-//
-//   import { pgTable, text, serial } from "drizzle-orm/pg-core";
-//   import { createInsertSchema } from "drizzle-zod";
-//   import { z } from "zod/v4";
-//
-//   export const postsTable = pgTable("posts", {
-//     id: serial("id").primaryKey(),
-//     title: text("title").notNull(),
-//   });
-//
-//   export const insertPostSchema = createInsertSchema(postsTable).omit({ id: true });
-//   export type InsertPost = z.infer<typeof insertPostSchema>;
-//   export type Post = typeof postsTable.$inferSelect;
+import {
+  pgTable,
+  text,
+  serial,
+  integer,
+  boolean,
+  timestamp,
+  numeric,
+} from "drizzle-orm/pg-core";
 
-export {}
+export const productsTable = pgTable("products", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  basePrice: numeric("base_price", { precision: 10, scale: 2 }).notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  images: text("images").array().notNull().default([]),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const variantsTable = pgTable("variants", {
+  id: serial("id").primaryKey(),
+  productId: integer("product_id")
+    .notNull()
+    .references(() => productsTable.id, { onDelete: "cascade" }),
+  size: text("size").notNull(),
+  color: text("color").notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+  stock: integer("stock").notNull().default(0),
+});
+
+export const ordersTable = pgTable("orders", {
+  id: serial("id").primaryKey(),
+  code: text("code").notNull().unique(),
+  customerName: text("customer_name").notNull(),
+  phone: text("phone").notNull(),
+  paymentPhone: text("payment_phone").notNull(),
+  address: text("address").notNull(),
+  city: text("city").notNull(),
+  totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+  paymentStatus: text("payment_status").notNull().default("Pending"),
+  orderStatus: text("order_status").notNull().default("Pending"),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const orderItemsTable = pgTable("order_items", {
+  id: serial("id").primaryKey(),
+  orderId: integer("order_id")
+    .notNull()
+    .references(() => ordersTable.id, { onDelete: "cascade" }),
+  variantId: integer("variant_id").notNull(),
+  productName: text("product_name").notNull(),
+  size: text("size").notNull(),
+  color: text("color").notNull(),
+  quantity: integer("quantity").notNull(),
+  price: numeric("price", { precision: 10, scale: 2 }).notNull(),
+});
+
+export const notificationsTable = pgTable("notifications", {
+  id: serial("id").primaryKey(),
+  type: text("type").notNull(),
+  message: text("message").notNull(),
+  isRead: boolean("is_read").notNull().default(false),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export type Product = typeof productsTable.$inferSelect;
+export type Variant = typeof variantsTable.$inferSelect;
+export type Order = typeof ordersTable.$inferSelect;
+export type OrderItem = typeof orderItemsTable.$inferSelect;
+export type Notification = typeof notificationsTable.$inferSelect;
