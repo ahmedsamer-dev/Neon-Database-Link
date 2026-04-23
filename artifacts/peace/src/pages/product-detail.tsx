@@ -1,9 +1,19 @@
 import { useState, useMemo } from "react";
-import { useParams } from "wouter";
+import { useParams, useLocation } from "wouter";
 import { useGetProduct } from "@workspace/api-client-react";
 import { useCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
@@ -19,11 +29,13 @@ export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: product, isLoading, error } = useGetProduct(id, { query: { enabled: !!id } });
   const { addItem, items } = useCart();
+  const [, navigate] = useLocation();
 
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [mainImageIndex, setMainImageIndex] = useState(0);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   const colors = useMemo(() => {
     if (!product?.variants) return [];
@@ -58,7 +70,17 @@ export default function ProductDetail() {
       image: product.images?.[0] || "",
       stock: selectedVariant.stock,
     });
-    toast.success(`تم إضافة ${quantity} ${product.name} إلى السلة`);
+    setConfirmOpen(true);
+  };
+
+  const handleAddMore = () => {
+    setConfirmOpen(false);
+    setQuantity(1);
+  };
+
+  const handleGoToCheckout = () => {
+    setConfirmOpen(false);
+    navigate("/checkout");
   };
 
   const priceToDisplay = selectedVariant?.price || product?.basePrice;
@@ -298,6 +320,25 @@ export default function ProductDetail() {
           </motion.div>
         </div>
       </div>
+
+      <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+        <AlertDialogContent dir="rtl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>تم إضافة المنتج إلى السلة</AlertDialogTitle>
+            <AlertDialogDescription>
+              هل تريد إضافة المزيد من المنتجات؟
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleAddMore}>
+              نعم، إضافة المزيد
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleGoToCheckout}>
+              لا، إتمام الطلب
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
