@@ -121,7 +121,7 @@ router.post("/orders", async (req, res) => {
 
   await db.insert(notificationsTable).values({
     type: "NewOrder",
-    message: `New order ${code} from ${input.customerName} — $${total.toFixed(2)}`,
+    message: `طلب جديد ${code} من ${input.customerName} — ${total.toFixed(2)} ج.م`,
   });
 
   req.log.info({ orderId: order.id, code }, "Order created");
