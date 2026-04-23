@@ -12,7 +12,20 @@ if (!connectionString) {
   );
 }
 
-export const pool = new Pool({ connectionString });
+export const pool = new Pool({
+  connectionString,
+  max: 10,
+  min: 2,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
+  keepAlive: true,
+  keepAliveInitialDelayMillis: 10_000,
+});
+
+pool.on("error", (err) => {
+  console.error("Unexpected pg pool error", err);
+});
+
 export const db = drizzle(pool, { schema });
 
 export * from "./schema";

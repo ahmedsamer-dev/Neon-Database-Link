@@ -7,7 +7,7 @@ import {
   notificationsTable,
 } from "@workspace/db";
 import { AdminLoginBody, UpdateOrderStatusBody } from "@workspace/api-zod";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, count, sum, inArray } from "drizzle-orm";
 import { checkCredentials, getToken, requireAdmin } from "../lib/admin";
 import { formatOrder } from "../lib/format";
 
@@ -34,21 +34,29 @@ router.get("/admin/orders", requireAdmin, async (_req, res) => {
     .orderBy(desc(ordersTable.createdAt));
 
   if (orders.length === 0) {
+    res.setHeader("Cache-Control", "private, no-store");
     res.json([]);
     return;
   }
-  const items = await db.select().from(orderItemsTable);
+
+  const orderIds = orders.map((o) => o.id);
+  const items = await db
+    .select()
+    .from(orderItemsTable)
+    .where(inArray(orderItemsTable.orderId, orderIds));
+
   const byOrder = new Map<number, typeof items>();
   for (const i of items) {
     const arr = byOrder.get(i.orderId) ?? [];
     arr.push(i);
     byOrder.set(i.orderId, arr);
   }
+
+  res.setHeader("Cache-Control", "private, no-store");
   res.json(orders.map((o) => formatOrder(o, byOrder.get(o.id) ?? [])));
 });
 
 async function findOrderByIdOrCode(idParam: string) {
-  // Accept either numeric DB id or order code (ORD-0001)
   const numeric = Number(idParam);
   if (!Number.isNaN(numeric)) {
     const [o] = await db
@@ -97,12 +105,15 @@ router.post("/admin/orders/:id/confirm-payment", requireAdmin, async (req, res) 
     .from(orderItemsTable)
     .where(eq(orderItemsTable.orderId, order.id));
 
-  // Check stock
+  const variantIds = items.map((i) => i.variantId);
+  const variants = await db
+    .select()
+    .from(variantsTable)
+    .where(inArray(variantsTable.id, variantIds));
+  const variantMap = new Map(variants.map((v) => [v.id, v]));
+
   for (const item of items) {
-    const [variant] = await db
-      .select()
-      .from(variantsTable)
-      .where(eq(variantsTable.id, item.variantId));
+    const variant = variantMap.get(item.variantId);
     if (!variant || variant.stock < item.quantity) {
       res.status(400).json({
         error: `Insufficient stock for ${item.productName} (${item.size}/${item.color})`,
@@ -111,7 +122,6 @@ router.post("/admin/orders/:id/confirm-payment", requireAdmin, async (req, res) 
     }
   }
 
-  // Reduce stock
   for (const item of items) {
     await db
       .update(variantsTable)
@@ -153,10 +163,12 @@ router.put("/admin/orders/:id/status", requireAdmin, async (req, res) => {
     .set({ orderStatus: parsed.data.status })
     .where(eq(ordersTable.id, order.id))
     .returning();
+
   const items = await db
     .select()
     .from(orderItemsTable)
     .where(eq(orderItemsTable.orderId, order.id));
+
   if (!updated) {
     res.status(500).json({ error: "Update failed" });
     return;
@@ -165,17 +177,30 @@ router.put("/admin/orders/:id/status", requireAdmin, async (req, res) => {
 });
 
 router.get("/admin/stats", requireAdmin, async (_req, res) => {
-  const orders = await db.select().from(ordersTable);
-  const notifications = await db.select().from(notificationsTable);
-  const stats = {
-    total: orders.length,
-    pending: orders.filter((o) => o.paymentStatus === "Pending").length,
-    paid: orders.filter((o) => o.paymentStatus === "Paid").length,
-    shipped: orders.filter((o) => o.orderStatus === "Shipped").length,
-    delivered: orders.filter((o) => o.orderStatus === "Delivered").length,
-    unreadNotifications: notifications.filter((n) => !n.isRead).length,
-  };
-  res.json(stats);
+  const [statsRow] = await db
+    .select({
+      total: count(),
+      paid: sql<number>`count(*) filter (where ${ordersTable.paymentStatus} = 'Paid')`,
+      pending: sql<number>`count(*) filter (where ${ordersTable.paymentStatus} = 'Pending')`,
+      shipped: sql<number>`count(*) filter (where ${ordersTable.orderStatus} = 'Shipped')`,
+      delivered: sql<number>`count(*) filter (where ${ordersTable.orderStatus} = 'Delivered')`,
+    })
+    .from(ordersTable);
+
+  const [notifRow] = await db
+    .select({ unread: count() })
+    .from(notificationsTable)
+    .where(eq(notificationsTable.isRead, false));
+
+  res.setHeader("Cache-Control", "private, max-age=10");
+  res.json({
+    total: Number(statsRow?.total ?? 0),
+    paid: Number(statsRow?.paid ?? 0),
+    pending: Number(statsRow?.pending ?? 0),
+    shipped: Number(statsRow?.shipped ?? 0),
+    delivered: Number(statsRow?.delivered ?? 0),
+    unreadNotifications: Number(notifRow?.unread ?? 0),
+  });
 });
 
 export default router;

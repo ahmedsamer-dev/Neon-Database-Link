@@ -1,41 +1,60 @@
+import { lazy, Suspense } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import NotFound from "@/pages/not-found";
 
 import { CartProvider } from "@/lib/cart";
 import { AuthProvider, useAuth } from "@/lib/auth";
-
 import { Layout } from "@/components/layout";
 import { AdminLayout } from "@/components/admin-layout";
 
 import Home from "@/pages/home";
 import ProductDetail from "@/pages/product-detail";
-import Checkout from "@/pages/checkout";
-import OrderConfirmation from "@/pages/order-confirmation";
-import About from "@/pages/about";
+import NotFound from "@/pages/not-found";
 
-import AdminLogin from "@/pages/admin/login";
-import AdminDashboard from "@/pages/admin/dashboard";
-import AdminOrders from "@/pages/admin/orders";
-import AdminOrderDetail from "@/pages/admin/order-detail";
-import AdminNotifications from "@/pages/admin/notifications";
-import AdminProducts from "@/pages/admin/products";
-import AdminSettings from "@/pages/admin/settings";
+const Checkout = lazy(() => import("@/pages/checkout"));
+const OrderConfirmation = lazy(() => import("@/pages/order-confirmation"));
+const About = lazy(() => import("@/pages/about"));
 
-const queryClient = new QueryClient();
+const AdminLogin = lazy(() => import("@/pages/admin/login"));
+const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
+const AdminOrders = lazy(() => import("@/pages/admin/orders"));
+const AdminOrderDetail = lazy(() => import("@/pages/admin/order-detail"));
+const AdminNotifications = lazy(() => import("@/pages/admin/notifications"));
+const AdminProducts = lazy(() => import("@/pages/admin/products"));
+const AdminSettings = lazy(() => import("@/pages/admin/settings"));
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30_000,
+      gcTime: 5 * 60_000,
+      retry: 1,
+      refetchOnWindowFocus: false,
+    },
+    mutations: {
+      retry: 0,
+    },
+  },
+});
+
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[40vh]">
+      <div className="w-8 h-8 border-2 border-foreground/20 border-t-foreground rounded-full animate-spin" />
+    </div>
+  );
+}
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { token } = useAuth();
-
-  if (!token) {
-    return <Redirect to="/admin/login" />;
-  }
-
+  if (!token) return <Redirect to="/admin/login" />;
   return (
     <AdminLayout>
-      <Component />
+      <Suspense fallback={<PageLoader />}>
+        <Component />
+      </Suspense>
     </AdminLayout>
   );
 }
@@ -46,23 +65,69 @@ function Router() {
 
   return (
     <Switch>
-      {/* Public Routes */}
       <Route path="/" component={() => <Layout><Home /></Layout>} />
-      <Route path="/products/:id" component={() => <Layout><ProductDetail /></Layout>} />
-      <Route path="/checkout" component={() => <Layout><Checkout /></Layout>} />
-      <Route path="/order-confirmation/:id" component={() => <Layout><OrderConfirmation /></Layout>} />
-      <Route path="/about" component={() => <Layout><About /></Layout>} />
+      <Route
+        path="/products/:id"
+        component={() => <Layout><ProductDetail /></Layout>}
+      />
+      <Route
+        path="/checkout"
+        component={() => (
+          <Layout>
+            <Suspense fallback={<PageLoader />}>
+              <Checkout />
+            </Suspense>
+          </Layout>
+        )}
+      />
+      <Route
+        path="/order-confirmation/:id"
+        component={() => (
+          <Layout>
+            <Suspense fallback={<PageLoader />}>
+              <OrderConfirmation />
+            </Suspense>
+          </Layout>
+        )}
+      />
+      <Route
+        path="/about"
+        component={() => (
+          <Layout>
+            <Suspense fallback={<PageLoader />}>
+              <About />
+            </Suspense>
+          </Layout>
+        )}
+      />
 
-      {/* Admin Auth Route */}
-      <Route path="/admin/login" component={AdminLogin} />
+      <Route
+        path="/admin/login"
+        component={() => (
+          <Suspense fallback={<PageLoader />}>
+            <AdminLogin />
+          </Suspense>
+        )}
+      />
 
-      {/* Protected Admin Routes */}
       <Route path="/admin" component={() => <ProtectedRoute component={AdminDashboard} />} />
       <Route path="/admin/orders" component={() => <ProtectedRoute component={AdminOrders} />} />
-      <Route path="/admin/orders/:id" component={() => <ProtectedRoute component={AdminOrderDetail} />} />
-      <Route path="/admin/notifications" component={() => <ProtectedRoute component={AdminNotifications} />} />
-      <Route path="/admin/products" component={() => <ProtectedRoute component={AdminProducts} />} />
-      <Route path="/admin/settings" component={() => <ProtectedRoute component={AdminSettings} />} />
+      <Route
+        path="/admin/orders/:id"
+        component={() => <ProtectedRoute component={AdminOrderDetail} />}
+      />
+      <Route
+        path="/admin/notifications"
+        component={() => <ProtectedRoute component={AdminNotifications} />}
+      />
+      <Route
+        path="/admin/products"
+        component={() => <ProtectedRoute component={AdminProducts} />}
+      />
+      <Route
+        path="/admin/settings"
+        component={() => <ProtectedRoute component={AdminSettings} />}
+      />
 
       <Route
         component={() =>
