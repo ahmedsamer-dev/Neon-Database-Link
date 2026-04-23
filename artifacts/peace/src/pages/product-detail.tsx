@@ -4,40 +4,42 @@ import { useGetProduct } from "@workspace/api-client-react";
 import { useCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Minus, Plus, ShoppingBag, ArrowLeft } from "lucide-react";
+import { Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+
+function isValidColor(str: string): boolean {
+  const s = new Option().style;
+  s.color = str;
+  return s.color !== "";
+}
 
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: product, isLoading, error } = useGetProduct(id, { query: { enabled: !!id } });
   const { addItem, items } = useCart();
-  
+
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
+  const [mainImageIndex, setMainImageIndex] = useState(0);
 
   const colors = useMemo(() => {
     if (!product?.variants) return [];
-    return Array.from(new Set(product.variants.map(v => v.color)));
+    return Array.from(new Set(product.variants.map((v) => v.color)));
   }, [product]);
 
   const availableSizes = useMemo(() => {
     if (!product?.variants || !selectedColor) return [];
-    return product.variants
-      .filter(v => v.color === selectedColor)
-      .map(v => v.size);
+    return product.variants.filter((v) => v.color === selectedColor).map((v) => v.size);
   }, [product, selectedColor]);
 
   const selectedVariant = useMemo(() => {
     if (!product?.variants || !selectedColor || !selectedSize) return null;
-    return product.variants.find(
-      v => v.color === selectedColor && v.size === selectedSize
-    );
+    return product.variants.find((v) => v.color === selectedColor && v.size === selectedSize);
   }, [product, selectedColor, selectedSize]);
 
-  // Reset size when color changes
   const handleColorSelect = (color: string) => {
     setSelectedColor(color);
     setSelectedSize(null);
@@ -46,7 +48,6 @@ export default function ProductDetail() {
 
   const handleAddToCart = () => {
     if (!product || !selectedVariant) return;
-    
     addItem({
       variantId: selectedVariant.id,
       quantity,
@@ -57,20 +58,19 @@ export default function ProductDetail() {
       image: product.images?.[0] || "",
       stock: selectedVariant.stock,
     });
-    
-    toast.success(`Added ${quantity} ${product.name} to cart`);
+    toast.success(`تم إضافة ${quantity} ${product.name} إلى السلة`);
   };
 
   const priceToDisplay = selectedVariant?.price || product?.basePrice;
   const isOutOfStock = selectedVariant && selectedVariant.stock <= 0;
-  const cartItem = selectedVariant ? items.find(i => i.variantId === selectedVariant.id) : null;
+  const cartItem = selectedVariant ? items.find((i) => i.variantId === selectedVariant.id) : null;
   const alreadyInCart = cartItem?.quantity ?? 0;
   const maxCanAdd = selectedVariant ? Math.max(0, selectedVariant.stock - alreadyInCart) : 0;
   const canAddToCart = selectedVariant && !isOutOfStock && maxCanAdd > 0;
 
   if (isLoading) {
     return (
-      <div className="container mx-auto px-4 md:px-8 py-12">
+      <div className="container mx-auto px-4 md:px-8 py-12" dir="rtl">
         <div className="flex flex-col md:flex-row gap-12">
           <div className="w-full md:w-1/2 flex gap-4">
             <div className="flex flex-col gap-4 w-20">
@@ -91,21 +91,24 @@ export default function ProductDetail() {
 
   if (error || !product) {
     return (
-      <div className="container mx-auto px-4 py-24 text-center">
-        <h2 className="text-2xl font-serif mb-4">Product not found</h2>
+      <div className="container mx-auto px-4 py-24 text-center" dir="rtl">
+        <h2 className="text-2xl font-serif mb-4">المنتج غير موجود</h2>
         <Button asChild variant="outline">
-          <Link href="/">Return Home</Link>
+          <Link href="/">العودة للمتجر</Link>
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 md:px-8 py-12">
+    <div className="container mx-auto px-4 md:px-8 py-12" dir="rtl">
       <div className="mb-8">
-        <Link href="/" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors">
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Back to Shop
+        <Link
+          href="/"
+          className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground transition-colors duration-200"
+        >
+          <ArrowRight className="ml-2 h-4 w-4" />
+          العودة للمتجر
         </Link>
       </div>
 
@@ -114,17 +117,27 @@ export default function ProductDetail() {
         <div className="w-full md:w-1/2 lg:w-[55%] flex gap-4">
           <div className="hidden sm:flex flex-col gap-4 w-20 flex-shrink-0">
             {product.images?.map((img, i) => (
-              <button key={i} className="aspect-[3/4] w-full bg-muted overflow-hidden border border-transparent hover:border-border transition-colors">
-                <img src={img} alt={`${product.name} view ${i+1}`} className="w-full h-full object-cover" />
+              <button
+                key={i}
+                onClick={() => setMainImageIndex(i)}
+                className={`aspect-[3/4] w-full bg-muted overflow-hidden border transition-all duration-200 ${
+                  mainImageIndex === i ? "border-foreground" : "border-transparent hover:border-border"
+                }`}
+              >
+                <img src={img} alt={`${product.name} ${i + 1}`} className="w-full h-full object-cover" />
               </button>
             ))}
           </div>
           <div className="aspect-[3/4] flex-1 bg-muted relative overflow-hidden">
-            {product.images?.[0] ? (
-              <img src={product.images[0]} alt={product.name} className="w-full h-full object-cover" />
+            {product.images?.[mainImageIndex] ? (
+              <img
+                src={product.images[mainImageIndex]}
+                alt={product.name}
+                className="w-full h-full object-cover"
+              />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-muted-foreground">
-                No image available
+                لا توجد صورة
               </div>
             )}
           </div>
@@ -132,14 +145,18 @@ export default function ProductDetail() {
 
         {/* Details */}
         <div className="w-full md:w-1/2 lg:w-[45%] flex flex-col">
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight mb-2">{product.name}</h1>
-            <p className="text-xl text-muted-foreground mb-6">${priceToDisplay?.toFixed(2)}</p>
-            
+            <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight mb-2">
+              {product.name}
+            </h1>
+            <p className="text-xl text-muted-foreground mb-6">
+              {priceToDisplay?.toFixed(2)} ج.م
+            </p>
+
             <div className="prose prose-sm text-muted-foreground mb-8">
               <p>{product.description}</p>
             </div>
@@ -149,101 +166,135 @@ export default function ProductDetail() {
               {/* Color */}
               <div>
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-sm font-medium">Color</span>
-                  <span className="text-sm text-muted-foreground">{selectedColor || "Select a color"}</span>
+                  <span className="text-sm font-medium">اللون</span>
+                  <span className="text-sm text-muted-foreground">
+                    {selectedColor || "اختر لوناً"}
+                  </span>
                 </div>
                 <div className="flex flex-wrap gap-3">
-                  {colors.map(color => (
-                    <button
-                      key={color}
-                      onClick={() => handleColorSelect(color)}
-                      className={`px-4 py-2 text-sm border rounded-sm transition-all
-                        ${selectedColor === color 
-                          ? 'border-foreground bg-foreground text-background' 
-                          : 'border-border hover:border-foreground/50'}`}
-                    >
-                      {color}
-                    </button>
-                  ))}
+                  {colors.map((color) => {
+                    const valid = isValidColor(color);
+                    return valid ? (
+                      <button
+                        key={color}
+                        onClick={() => handleColorSelect(color)}
+                        title={color}
+                        className={`w-9 h-9 rounded-full border-2 transition-all duration-200 hover:scale-110 ${
+                          selectedColor === color
+                            ? "border-foreground ring-2 ring-foreground ring-offset-2"
+                            : "border-transparent hover:border-border"
+                        }`}
+                        style={{ backgroundColor: color }}
+                      />
+                    ) : (
+                      <button
+                        key={color}
+                        onClick={() => handleColorSelect(color)}
+                        className={`px-4 py-2 text-sm border rounded-sm transition-all duration-200 hover:scale-[1.02] ${
+                          selectedColor === color
+                            ? "border-foreground bg-foreground text-background"
+                            : "border-border hover:border-foreground/50"
+                        }`}
+                      >
+                        {color}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
               {/* Size */}
               {selectedColor && (
-                <motion.div 
+                <motion.div
                   initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: 'auto' }}
+                  animate={{ opacity: 1, height: "auto" }}
                 >
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-sm font-medium">Size</span>
-                    <span className="text-sm text-muted-foreground">{selectedSize || "Select a size"}</span>
+                    <span className="text-sm font-medium">المقاس</span>
+                    <span className="text-sm text-muted-foreground">
+                      {selectedSize || "اختر مقاساً"}
+                    </span>
                   </div>
                   <div className="flex flex-wrap gap-3">
                     {product.variants
-                      .filter(v => v.color === selectedColor)
-                      .map(variant => (
+                      .filter((v) => v.color === selectedColor)
+                      .map((variant) => (
                         <button
                           key={variant.size}
                           onClick={() => setSelectedSize(variant.size)}
                           disabled={variant.stock <= 0}
-                          className={`h-12 min-w-12 px-4 border rounded-sm flex items-center justify-center transition-all text-sm
-                            ${selectedSize === variant.size 
-                              ? 'border-foreground bg-foreground text-background' 
-                              : variant.stock <= 0
-                                ? 'opacity-30 cursor-not-allowed bg-muted'
-                                : 'border-border hover:border-foreground/50'}`}
+                          className={`h-12 min-w-12 px-4 border rounded-sm flex items-center justify-center transition-all duration-200 text-sm
+                            ${
+                              selectedSize === variant.size
+                                ? "border-foreground bg-foreground text-background"
+                                : variant.stock <= 0
+                                ? "opacity-30 cursor-not-allowed bg-muted"
+                                : "border-border hover:border-foreground/50 hover:scale-[1.02]"
+                            }`}
                         >
                           {variant.size}
                         </button>
-                    ))}
+                      ))}
                   </div>
                 </motion.div>
               )}
             </div>
 
+            {/* Out of Stock Banner */}
+            {isOutOfStock && (
+              <div className="mb-4 p-3 bg-rose-50 border border-rose-200 rounded-md text-center">
+                <p className="text-rose-600 font-semibold text-sm">نفذت الكمية</p>
+                <p className="text-rose-400 text-xs mt-0.5">هذا المنتج غير متاح حالياً</p>
+              </div>
+            )}
+
             {/* Add to Cart */}
             <div className="space-y-4 pt-6 border-t border-border">
               <div className="flex items-center gap-4">
                 <div className="flex items-center border rounded-sm h-12">
-                  <button 
+                  <button
                     onClick={() => setQuantity(Math.max(1, quantity - 1))}
                     disabled={!canAddToCart}
-                    className="w-12 h-full flex items-center justify-center hover:bg-muted disabled:opacity-50 transition-colors"
+                    className="w-12 h-full flex items-center justify-center hover:bg-muted disabled:opacity-50 transition-colors duration-200"
                   >
                     <Minus className="h-4 w-4" />
                   </button>
                   <span className="w-12 text-center text-sm font-medium">{quantity}</span>
-                  <button 
+                  <button
                     onClick={() => setQuantity(Math.min(maxCanAdd, quantity + 1))}
                     disabled={!canAddToCart || quantity >= maxCanAdd}
-                    className="w-12 h-full flex items-center justify-center hover:bg-muted disabled:opacity-50 transition-colors"
+                    className="w-12 h-full flex items-center justify-center hover:bg-muted disabled:opacity-50 transition-colors duration-200"
                   >
                     <Plus className="h-4 w-4" />
                   </button>
                 </div>
-                
-                <Button 
+
+                <Button
                   onClick={handleAddToCart}
                   disabled={!canAddToCart}
-                  className="flex-1 h-12 rounded-sm text-base"
+                  className="flex-1 h-12 rounded-sm text-base transition-all duration-200 hover:scale-[1.01]"
                 >
-                  {isOutOfStock || (!isOutOfStock && selectedVariant && maxCanAdd === 0 && alreadyInCart > 0)
-                    ? alreadyInCart > 0 ? "Already in Cart (Max)" : "Out of Stock"
-                    : !selectedVariant ? "Select Options" : "Add to Cart"}
+                  <ShoppingBag className="ml-2 h-4 w-4" />
+                  {isOutOfStock
+                    ? "نفذت الكمية"
+                    : !selectedVariant
+                    ? "اختر الخيارات"
+                    : alreadyInCart > 0 && maxCanAdd === 0
+                    ? "في السلة (الحد الأقصى)"
+                    : "أضف إلى السلة"}
                 </Button>
               </div>
-              
+
               {selectedVariant && (
                 <p className="text-xs text-muted-foreground text-center">
                   {maxCanAdd > 0
-                    ? `${maxCanAdd} item${maxCanAdd === 1 ? "" : "s"} available to add`
+                    ? `${maxCanAdd} قطعة متاحة للإضافة`
                     : alreadyInCart > 0
-                      ? "You already have all available stock in your cart"
-                      : "Out of stock"}
+                    ? "لديك الحد الأقصى المتاح في السلة"
+                    : "نفذت الكمية"}
                 </p>
               )}
             </div>
-
           </motion.div>
         </div>
       </div>

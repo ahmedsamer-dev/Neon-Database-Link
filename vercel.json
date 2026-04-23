@@ -1,0 +1,7 @@
+{
+  "buildCommand": "pnpm install && PORT=3000 BASE_PATH=/ pnpm --filter @workspace/peace run build",
+  "outputDirectory": "artifacts/peace/dist/public",
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ]
+}

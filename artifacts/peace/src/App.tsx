@@ -14,6 +14,7 @@ import Home from "@/pages/home";
 import ProductDetail from "@/pages/product-detail";
 import Checkout from "@/pages/checkout";
 import OrderConfirmation from "@/pages/order-confirmation";
+import About from "@/pages/about";
 
 import AdminLogin from "@/pages/admin/login";
 import AdminDashboard from "@/pages/admin/dashboard";
@@ -25,10 +26,9 @@ import AdminSettings from "@/pages/admin/settings";
 
 const queryClient = new QueryClient();
 
-// Protected Route Guard for Admin
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { token } = useAuth();
-  
+
   if (!token) {
     return <Redirect to="/admin/login" />;
   }
@@ -42,7 +42,7 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 
 function Router() {
   const [location] = useLocation();
-  const isAdminRoute = location.startsWith('/admin') && location !== '/admin/login';
+  const isAdminRoute = location.startsWith("/admin") && location !== "/admin/login";
 
   return (
     <Switch>
@@ -51,6 +51,7 @@ function Router() {
       <Route path="/products/:id" component={() => <Layout><ProductDetail /></Layout>} />
       <Route path="/checkout" component={() => <Layout><Checkout /></Layout>} />
       <Route path="/order-confirmation/:id" component={() => <Layout><OrderConfirmation /></Layout>} />
+      <Route path="/about" component={() => <Layout><About /></Layout>} />
 
       {/* Admin Auth Route */}
       <Route path="/admin/login" component={AdminLogin} />
@@ -63,7 +64,15 @@ function Router() {
       <Route path="/admin/products" component={() => <ProtectedRoute component={AdminProducts} />} />
       <Route path="/admin/settings" component={() => <ProtectedRoute component={AdminSettings} />} />
 
-      <Route component={() => (isAdminRoute ? <AdminLayout><NotFound /></AdminLayout> : <Layout><NotFound /></Layout>)} />
+      <Route
+        component={() =>
+          isAdminRoute ? (
+            <AdminLayout><NotFound /></AdminLayout>
+          ) : (
+            <Layout><NotFound /></Layout>
+          )
+        }
+      />
     </Switch>
   );
 }
