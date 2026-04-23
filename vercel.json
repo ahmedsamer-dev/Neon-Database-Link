@@ -3,7 +3,13 @@
   "buildCommand": "pnpm install && PORT=3000 BASE_PATH=/ pnpm --filter @workspace/peace run build",
   "outputDirectory": "artifacts/peace/dist/public",
   "installCommand": "pnpm install",
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 30
+    }
+  },
   "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "headers": [
