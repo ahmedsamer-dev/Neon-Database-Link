@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, ShoppingCart, Bell, LogOut, Package } from "lucide-react";
+import { LayoutDashboard, ShoppingCart, Bell, LogOut, Package, Settings } from "lucide-react";
 
 export function AdminLayout({ children }: { children: React.ReactNode }) {
   const [location] = useLocation();
@@ -10,7 +10,9 @@ export function AdminLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+    { href: "/admin/products", label: "Products", icon: Package },
     { href: "/admin/notifications", label: "Notifications", icon: Bell },
+    { href: "/admin/settings", label: "Settings", icon: Settings },
   ];
 
   return (

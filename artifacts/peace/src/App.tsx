@@ -20,6 +20,8 @@ import AdminDashboard from "@/pages/admin/dashboard";
 import AdminOrders from "@/pages/admin/orders";
 import AdminOrderDetail from "@/pages/admin/order-detail";
 import AdminNotifications from "@/pages/admin/notifications";
+import AdminProducts from "@/pages/admin/products";
+import AdminSettings from "@/pages/admin/settings";
 
 const queryClient = new QueryClient();
 
@@ -58,6 +60,8 @@ function Router() {
       <Route path="/admin/orders" component={() => <ProtectedRoute component={AdminOrders} />} />
       <Route path="/admin/orders/:id" component={() => <ProtectedRoute component={AdminOrderDetail} />} />
       <Route path="/admin/notifications" component={() => <ProtectedRoute component={AdminNotifications} />} />
+      <Route path="/admin/products" component={() => <ProtectedRoute component={AdminProducts} />} />
+      <Route path="/admin/settings" component={() => <ProtectedRoute component={AdminSettings} />} />
 
       <Route component={() => (isAdminRoute ? <AdminLayout><NotFound /></AdminLayout> : <Layout><NotFound /></Layout>)} />
     </Switch>

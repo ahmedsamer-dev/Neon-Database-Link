@@ -50,8 +50,19 @@ export default defineConfig({
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
       "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+      "@tanstack/react-query": path.resolve(
+        import.meta.dirname,
+        "..",
+        "..",
+        "node_modules",
+        ".pnpm",
+        "@tanstack+react-query@5.90.21_react@19.1.0",
+        "node_modules",
+        "@tanstack",
+        "react-query",
+      ),
     },
-    dedupe: ["react", "react-dom"],
+    dedupe: ["react", "react-dom", "@tanstack/react-query"],
   },
   root: path.resolve(import.meta.dirname),
   build: {
@@ -63,8 +74,15 @@ export default defineConfig({
     strictPort: true,
     host: "0.0.0.0",
     allowedHosts: true,
+    proxy: {
+      "/api": {
+        target: "http://localhost:8080",
+        changeOrigin: true,
+      },
+    },
     fs: {
-      strict: true,
+      strict: false,
+      allow: [path.resolve(import.meta.dirname, "..", "..")],
     },
   },
   preview: {

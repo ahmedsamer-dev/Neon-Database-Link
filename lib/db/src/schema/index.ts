@@ -64,8 +64,16 @@ export const notificationsTable = pgTable("notifications", {
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
+export const storeSettingsTable = pgTable("store_settings", {
+  id: serial("id").primaryKey(),
+  key: text("key").notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
 export type Product = typeof productsTable.$inferSelect;
 export type Variant = typeof variantsTable.$inferSelect;
 export type Order = typeof ordersTable.$inferSelect;
 export type OrderItem = typeof orderItemsTable.$inferSelect;
 export type Notification = typeof notificationsTable.$inferSelect;
+export type StoreSetting = typeof storeSettingsTable.$inferSelect;
