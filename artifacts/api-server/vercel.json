@@ -1,0 +1,21 @@
+{
+  "buildCommand": "cd ../.. && pnpm install && PORT=3000 BASE_PATH=/ pnpm --filter @workspace/peace run build",
+  "outputDirectory": "public",
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/api/index" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
+  ],
+  "headers": [
+    {
+      "source": "/assets/(.*)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    }
+  ]
+}
