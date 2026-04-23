@@ -12,7 +12,7 @@ import { toast } from "sonner";
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: product, isLoading, error } = useGetProduct(id, { query: { enabled: !!id } });
-  const { addItem } = useCart();
+  const { addItem, items } = useCart();
   
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -55,6 +55,7 @@ export default function ProductDetail() {
       color: selectedVariant.color,
       price: selectedVariant.price,
       image: product.images?.[0] || "",
+      stock: selectedVariant.stock,
     });
     
     toast.success(`Added ${quantity} ${product.name} to cart`);
@@ -62,7 +63,10 @@ export default function ProductDetail() {
 
   const priceToDisplay = selectedVariant?.price || product?.basePrice;
   const isOutOfStock = selectedVariant && selectedVariant.stock <= 0;
-  const canAddToCart = selectedVariant && !isOutOfStock;
+  const cartItem = selectedVariant ? items.find(i => i.variantId === selectedVariant.id) : null;
+  const alreadyInCart = cartItem?.quantity ?? 0;
+  const maxCanAdd = selectedVariant ? Math.max(0, selectedVariant.stock - alreadyInCart) : 0;
+  const canAddToCart = selectedVariant && !isOutOfStock && maxCanAdd > 0;
 
   if (isLoading) {
     return (
@@ -210,8 +214,8 @@ export default function ProductDetail() {
                   </button>
                   <span className="w-12 text-center text-sm font-medium">{quantity}</span>
                   <button 
-                    onClick={() => setQuantity(Math.min(selectedVariant?.stock || 99, quantity + 1))}
-                    disabled={!canAddToCart || quantity >= (selectedVariant?.stock || 0)}
+                    onClick={() => setQuantity(Math.min(maxCanAdd, quantity + 1))}
+                    disabled={!canAddToCart || quantity >= maxCanAdd}
                     className="w-12 h-full flex items-center justify-center hover:bg-muted disabled:opacity-50 transition-colors"
                   >
                     <Plus className="h-4 w-4" />
@@ -223,13 +227,19 @@ export default function ProductDetail() {
                   disabled={!canAddToCart}
                   className="flex-1 h-12 rounded-sm text-base"
                 >
-                  {isOutOfStock ? "Out of Stock" : !selectedVariant ? "Select Options" : "Add to Cart"}
+                  {isOutOfStock || (!isOutOfStock && selectedVariant && maxCanAdd === 0 && alreadyInCart > 0)
+                    ? alreadyInCart > 0 ? "Already in Cart (Max)" : "Out of Stock"
+                    : !selectedVariant ? "Select Options" : "Add to Cart"}
                 </Button>
               </div>
               
               {selectedVariant && (
                 <p className="text-xs text-muted-foreground text-center">
-                  {selectedVariant.stock} items available in stock
+                  {maxCanAdd > 0
+                    ? `${maxCanAdd} item${maxCanAdd === 1 ? "" : "s"} available to add`
+                    : alreadyInCart > 0
+                      ? "You already have all available stock in your cart"
+                      : "Out of stock"}
                 </p>
               )}
             </div>

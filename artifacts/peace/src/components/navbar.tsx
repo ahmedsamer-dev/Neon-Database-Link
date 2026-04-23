@@ -87,11 +87,15 @@ export function Navbar() {
                                 <span className="w-8 text-center text-xs font-medium">{item.quantity}</span>
                                 <button
                                   onClick={() => updateQuantity(item.variantId, item.quantity + 1)}
-                                  className="p-1 hover:bg-muted transition-colors"
+                                  disabled={item.quantity >= item.stock}
+                                  className="p-1 hover:bg-muted transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
                                 >
                                   <Plus className="h-3 w-3" />
                                 </button>
                               </div>
+                              {item.quantity >= item.stock && (
+                                <span className="text-xs text-muted-foreground">Max stock</span>
+                              )}
                             </div>
                           </div>
                         </div>
