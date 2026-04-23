@@ -13,14 +13,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             <h3 className="font-serif font-bold text-xl mb-2">PEACE.</h3>
             <p className="text-sm text-muted-foreground">Wear the calm. Live with intention.</p>
           </div>
-          <div className="flex gap-6 text-sm text-muted-foreground">
-            <Link href="/admin/login" className="hover:text-foreground">Admin</Link>
-          </div>
         </div>
       </footer>
     </div>
   );
 }
-
-// Temporary Link implementation for footer
-import { Link } from "wouter";
