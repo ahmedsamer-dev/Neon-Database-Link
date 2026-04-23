@@ -13,6 +13,28 @@ import { formatOrder } from "../lib/format";
 
 const router: IRouter = Router();
 
+router.get("/orders/:id", async (req, res) => {
+  const idParam = req.params.id;
+  const numeric = Number(idParam);
+
+  const [order] = await db
+    .select()
+    .from(ordersTable)
+    .where(isNaN(numeric) ? eq(ordersTable.code, idParam) : eq(ordersTable.id, numeric));
+
+  if (!order) {
+    res.status(404).json({ error: "Order not found" });
+    return;
+  }
+
+  const items = await db
+    .select()
+    .from(orderItemsTable)
+    .where(eq(orderItemsTable.orderId, order.id));
+
+  res.json(formatOrder(order, items));
+});
+
 router.post("/orders", async (req, res) => {
   const parsed = CreateOrderBody.safeParse(req.body);
   if (!parsed.success) {

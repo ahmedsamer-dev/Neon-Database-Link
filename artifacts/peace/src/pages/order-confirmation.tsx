@@ -1,5 +1,4 @@
 import { useParams, Link } from "wouter";
-import { useGetOrder } from "@workspace/api-client-react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -7,6 +6,26 @@ import { CheckCircle2, MessageCircle, Phone, Copy, Check } from "lucide-react";
 import { motion } from "framer-motion";
 import { useState } from "react";
 import { toast } from "sonner";
+
+interface OrderItem {
+  id: number;
+  productName: string;
+  color: string;
+  size: string;
+  quantity: number;
+  price: number;
+}
+
+interface Order {
+  id: string;
+  customerName: string;
+  phone: string;
+  paymentPhone: string;
+  totalAmount: number;
+  paymentStatus: string;
+  orderStatus: string;
+  items: OrderItem[];
+}
 
 interface StoreSettings {
   paymentPhone: string;
@@ -18,11 +37,16 @@ export default function OrderConfirmation() {
   const { id } = useParams<{ id: string }>();
   const [copied, setCopied] = useState(false);
 
-  const { data: order, isLoading: orderLoading } = useGetOrder(
-    id || "",
-    { token: "" },
-    { query: { enabled: !!id } }
-  );
+  const { data: order, isLoading: orderLoading } = useQuery<Order>({
+    queryKey: ["order", id],
+    queryFn: async () => {
+      const res = await fetch(`/api/orders/${id}`);
+      if (!res.ok) throw new Error("Order not found");
+      return res.json();
+    },
+    enabled: !!id,
+    retry: false,
+  });
 
   const { data: settings, isLoading: settingsLoading } = useQuery<StoreSettings>({
     queryKey: ["store-settings"],
@@ -51,7 +75,7 @@ export default function OrderConfirmation() {
       .join("%0A");
 
     const message =
-      `مرحباً ${settings.storeName}%0A%0Aلقد أرسلت طلبي.%0Aرقم الطلب: ${order.id}%0Aالاسم: ${order.customerName}%0A%0Aالمنتجات:%0A${itemsList}%0A%0Aالإجمالي: ${order.totalAmount.toFixed(2)} جنيه%0A%0Aسأرسل الدفع من الرقم: ${order.paymentPhone}%0Aيرجى التأكيد!`;
+      `مرحباً ${settings.storeName}%0A%0Aلقد أرسلت طلبي.%0Aرقم الطلب: ${order.id}%0Aالاسم: ${order.customerName}%0A%0Aالمنتجات:%0A${itemsList}%0A%0Aالإجمالي: ${Number(order.totalAmount).toFixed(2)} جنيه%0A%0Aسأرسل الدفع من الرقم: ${order.paymentPhone}%0Aيرجى التأكيد!`;
 
     return `https://wa.me/${phone}?text=${message}`;
   };
@@ -70,16 +94,16 @@ export default function OrderConfirmation() {
   if (!order) {
     return (
       <div className="container mx-auto px-4 py-24 max-w-xl text-center">
-        <h1 className="text-2xl font-serif mb-4">Order not found</h1>
+        <h1 className="text-2xl font-serif mb-4">الطلب غير موجود</h1>
         <Button asChild>
-          <Link href="/">Return to Shop</Link>
+          <Link href="/">العودة للمتجر</Link>
         </Button>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-24 max-w-2xl text-center">
+    <div className="container mx-auto px-4 py-24 max-w-2xl text-center" dir="rtl">
       <motion.div
         initial={{ scale: 0.8, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
@@ -110,7 +134,7 @@ export default function OrderConfirmation() {
           <p className="text-sm text-muted-foreground">
             لإتمام طلبك، يرجى تحويل مبلغ{" "}
             <strong className="text-foreground text-base">
-              {order.totalAmount.toFixed(2)} جنيه
+              {Number(order.totalAmount).toFixed(2)} جنيه
             </strong>{" "}
             عبر فودافون كاش على الرقم التالي:
           </p>
@@ -125,11 +149,16 @@ export default function OrderConfirmation() {
             <div className="text-right">
               <p className="text-xs text-muted-foreground mb-0.5">رقم فودافون كاش</p>
               <p className="font-mono text-2xl font-bold tracking-wider">
-                {settings?.paymentPhone}
+                {settings?.paymentPhone ?? "..."}
               </p>
             </div>
           </div>
-          <Button variant="outline" size="icon" onClick={copyPhone} className="flex-shrink-0 h-10 w-10">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={copyPhone}
+            className="flex-shrink-0 h-10 w-10"
+          >
             {copied ? (
               <Check className="h-4 w-4 text-green-500" />
             ) : (
@@ -138,7 +167,7 @@ export default function OrderConfirmation() {
           </Button>
         </div>
 
-        <p className="text-sm text-muted-foreground text-right">
+        <p className="text-sm text-muted-foreground">
           بعد إرسال التحويل، اضغط على الزر أدناه لإرسالنا رسالة على واتساب بتفاصيل طلبك حتى نتمكن من تأكيد استلام الدفع.
         </p>
       </motion.div>
