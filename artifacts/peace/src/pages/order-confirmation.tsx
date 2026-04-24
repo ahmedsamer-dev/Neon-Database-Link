@@ -1,6 +1,8 @@
 import { useParams, Link, useSearch } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2, MessageCircle, Phone, Copy, Check } from "lucide-react";
 import { motion } from "framer-motion";
@@ -35,8 +37,12 @@ interface StoreSettings {
 export default function OrderConfirmation() {
   const { id } = useParams<{ id: string }>();
   const search = useSearch();
-  const phone = new URLSearchParams(search).get("phone") ?? "";
+  const queryPhone = new URLSearchParams(search).get("phone") ?? "";
+  const [manualPhone, setManualPhone] = useState("");
+  const [submittedManualPhone, setSubmittedManualPhone] = useState("");
   const [copied, setCopied] = useState(false);
+
+  const phone = queryPhone || submittedManualPhone;
 
   const { data: order, isLoading: orderLoading } = useQuery<Order>({
     queryKey: ["order", id, phone],
@@ -60,7 +66,15 @@ export default function OrderConfirmation() {
     },
   });
 
-  const isLoading = orderLoading || settingsLoading;
+  const isLoading = (!!phone && orderLoading) || settingsLoading;
+  const needsPhonePrompt = !!id && !phone;
+
+  const onSubmitPhone = (e: React.FormEvent) => {
+    e.preventDefault();
+    const digits = manualPhone.replace(/\D/g, "").slice(-4);
+    if (digits.length < 4) return;
+    setSubmittedManualPhone(digits);
+  };
 
   const copyPhone = () => {
     if (!settings?.paymentPhone) return;
@@ -83,6 +97,44 @@ export default function OrderConfirmation() {
     return `https://wa.me/${phone}?text=${message}`;
   };
 
+  if (needsPhonePrompt) {
+    return (
+      <div
+        className="container mx-auto px-4 py-24 max-w-md text-center"
+        dir="rtl"
+      >
+        <h1 className="text-2xl font-serif font-bold mb-3">تأكيد الهوية</h1>
+        <p className="text-sm text-muted-foreground mb-8">
+          للوصول إلى تفاصيل الطلب{" "}
+          <span className="font-mono" dir="ltr">
+            {id}
+          </span>
+          ، أدخل آخر 4 أرقام من رقم الهاتف الذي تم استخدامه عند الطلب.
+        </p>
+        <form onSubmit={onSubmitPhone} className="space-y-4 text-right">
+          <div>
+            <Label htmlFor="confirm-phone" className="text-sm mb-2 block">
+              آخر 4 أرقام من الهاتف
+            </Label>
+            <Input
+              id="confirm-phone"
+              placeholder="1234"
+              value={manualPhone}
+              onChange={(e) => setManualPhone(e.target.value)}
+              inputMode="numeric"
+              maxLength={4}
+              className="h-12 text-base"
+              dir="ltr"
+            />
+          </div>
+          <Button type="submit" className="w-full h-12">
+            عرض الطلب
+          </Button>
+        </form>
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-24 max-w-xl text-center space-y-6">
@@ -96,11 +148,25 @@ export default function OrderConfirmation() {
 
   if (!order) {
     return (
-      <div className="container mx-auto px-4 py-24 max-w-xl text-center">
-        <h1 className="text-2xl font-serif mb-4">الطلب غير موجود</h1>
-        <Button asChild>
-          <Link href="/">العودة للمتجر</Link>
-        </Button>
+      <div className="container mx-auto px-4 py-24 max-w-xl text-center" dir="rtl">
+        <h1 className="text-2xl font-serif mb-3">الطلب غير موجود</h1>
+        <p className="text-sm text-muted-foreground mb-8">
+          تأكد من رقم الطلب وآخر 4 أرقام من الهاتف، ثم حاول مرة أخرى.
+        </p>
+        <div className="flex flex-col sm:flex-row gap-3 justify-center">
+          <Button
+            variant="outline"
+            onClick={() => {
+              setSubmittedManualPhone("");
+              setManualPhone("");
+            }}
+          >
+            إعادة المحاولة
+          </Button>
+          <Button asChild>
+            <Link href="/">العودة للمتجر</Link>
+          </Button>
+        </div>
       </div>
     );
   }

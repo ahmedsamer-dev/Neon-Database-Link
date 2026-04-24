@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
-import { Package, CheckCircle2, Clock, Truck, XCircle, Search } from "lucide-react";
+import { Package, Clock, Truck, XCircle, Search } from "lucide-react";
 import { Link } from "wouter";
 
 interface OrderItem {
@@ -28,7 +28,6 @@ interface Order {
 
 const STAGES = [
   { key: "Pending", label: "تم استلام الطلب", icon: Clock },
-  { key: "Confirmed", label: "تم تأكيد الدفع", icon: CheckCircle2 },
   { key: "Shipped", label: "تم الشحن", icon: Truck },
   { key: "Delivered", label: "تم التسليم", icon: Package },
 ];
@@ -225,10 +224,8 @@ export default function TrackOrder() {
                 <div>
                   <p className="text-muted-foreground mb-1">حالة الدفع</p>
                   <p className="font-medium">
-                    {order.paymentStatus === "Confirmed"
-                      ? "مؤكد"
-                      : order.paymentStatus === "Rejected"
-                      ? "مرفوض"
+                    {order.paymentStatus === "Paid"
+                      ? "تم تأكيد الدفع"
                       : "قيد المراجعة"}
                   </p>
                 </div>
