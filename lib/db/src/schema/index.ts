@@ -7,6 +7,7 @@ import {
   timestamp,
   numeric,
   index,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const productsTable = pgTable(
@@ -40,6 +41,11 @@ export const variantsTable = pgTable(
   },
   (table) => [
     index("variants_product_id_idx").on(table.productId),
+    uniqueIndex("variants_product_size_color_unique_idx").on(
+      table.productId,
+      table.size,
+      table.color,
+    ),
   ],
 );
 
@@ -48,20 +54,39 @@ export const ordersTable = pgTable(
   {
     id: serial("id").primaryKey(),
     code: text("code").notNull().unique(),
+
     customerName: text("customer_name").notNull(),
     phone: text("phone").notNull(),
-    paymentPhone: text("payment_phone").notNull(),
     address: text("address").notNull(),
     city: text("city").notNull(),
+    governorate: text("governorate"),
+
     totalAmount: numeric("total_amount", { precision: 10, scale: 2 }).notNull(),
+    discountAmount: numeric("discount_amount", { precision: 10, scale: 2 }),
+
+    paymentPhone: text("payment_phone").notNull(),
     paymentStatus: text("payment_status").notNull().default("Pending"),
+    paymentMethod: text("payment_method"),
+    paymentGateway: text("payment_gateway"),
+    paymentTransactionId: text("payment_transaction_id"),
+
     orderStatus: text("order_status").notNull().default("Pending"),
+
+    shippingProvider: text("shipping_provider"),
+    shippingCost: numeric("shipping_cost", { precision: 10, scale: 2 }),
+    shippingTrackingNumber: text("shipping_tracking_number"),
+    shippingStatus: text("shipping_status"),
+    estimatedDeliveryDate: timestamp("estimated_delivery_date"),
+    shippingNotes: text("shipping_notes"),
+
     createdAt: timestamp("created_at").notNull().defaultNow(),
   },
   (table) => [
     index("orders_payment_status_idx").on(table.paymentStatus),
     index("orders_order_status_idx").on(table.orderStatus),
     index("orders_created_at_idx").on(table.createdAt),
+    index("orders_shipping_status_idx").on(table.shippingStatus),
+    index("orders_shipping_tracking_idx").on(table.shippingTrackingNumber),
   ],
 );
 
