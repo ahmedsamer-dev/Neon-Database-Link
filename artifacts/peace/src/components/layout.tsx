@@ -32,18 +32,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
               </li>
             </ul>
           </div>
-          <div>
-            <h4 className="text-xs uppercase tracking-[0.25em] text-muted-foreground mb-4">
-              المساعدة
-            </h4>
-            <ul className="space-y-2 text-sm">
-              <li>
-                <Link href="/track" className="link-premium inline-block">
-                  تتبع طلبك
-                </Link>
-              </li>
-            </ul>
-          </div>
         </div>
         <div className="container mx-auto px-4 md:px-8 mt-10 pt-6 border-t border-border text-xs text-muted-foreground text-center">
           © {new Date().getFullYear()} PEACE. جميع الحقوق محفوظة.
