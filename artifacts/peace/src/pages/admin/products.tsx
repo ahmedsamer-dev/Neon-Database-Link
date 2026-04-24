@@ -84,6 +84,15 @@ export default function AdminProducts() {
   const [editingDetails, setEditingDetails] = useState<AdminProduct | null>(null);
   const [detailsForm, setDetailsForm] = useState({ name: "", description: "", basePrice: "" });
 
+  const [editingVariant, setEditingVariant] = useState<{
+    productId: string;
+    variantId: string;
+    size: string;
+    color: string;
+    price: string;
+    stock: string;
+  } | null>(null);
+
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [createForm, setCreateForm] = useState(emptyProduct());
   const [createImageMode, setCreateImageMode] = useState<"url" | "file">("url");
@@ -203,6 +212,35 @@ export default function AdminProducts() {
       queryClient.invalidateQueries({ queryKey: ["admin-products"] });
     },
     onError: () => toast.error("فشل حذف المتغير"),
+  });
+
+  const updateVariantMutation = useMutation({
+    mutationFn: async ({
+      productId,
+      variantId,
+      data,
+    }: {
+      productId: string;
+      variantId: string;
+      data: { size: string; color: string; price: number; stock: number };
+    }) => {
+      const res = await fetch(
+        `/api/admin/products/${productId}/variants/${variantId}?token=${token}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        }
+      );
+      if (!res.ok) throw new Error("Failed to update variant");
+      return res.json();
+    },
+    onSuccess: () => {
+      toast.success("تم تحديث المتغير");
+      queryClient.invalidateQueries({ queryKey: ["admin-products"] });
+      setEditingVariant(null);
+    },
+    onError: () => toast.error("فشل تحديث المتغير"),
   });
 
   const createProductMutation = useMutation({
@@ -425,44 +463,158 @@ export default function AdminProducts() {
                   </p>
                   {product.variants.length > 0 ? (
                     <div className="space-y-2 mb-4">
-                      {product.variants.map((v) => (
-                        <div
-                          key={v.id}
-                          className="flex items-center gap-3 text-sm p-2 bg-muted/40 rounded"
-                        >
-                          <span className="font-medium min-w-[40px]">{v.size}</span>
-                          <div className="flex items-center gap-1.5">
-                            {(() => {
-                              const s = new Option().style;
-                              s.color = v.color;
-                              return s.color !== "" ? (
-                                <span
-                                  className="w-4 h-4 rounded-full border border-border flex-shrink-0"
-                                  style={{ backgroundColor: v.color }}
-                                />
-                              ) : null;
-                            })()}
-                            <span className="text-muted-foreground">{v.color}</span>
+                      {product.variants.map((v) => {
+                        const isEditing =
+                          editingVariant?.productId === product.id &&
+                          editingVariant?.variantId === v.id;
+
+                        if (isEditing) {
+                          return (
+                            <div
+                              key={v.id}
+                              className="grid grid-cols-2 sm:grid-cols-5 gap-2 items-center p-2 bg-muted/60 rounded border border-primary/20"
+                            >
+                              <Input
+                                className="h-7 text-sm"
+                                placeholder="المقاس"
+                                value={editingVariant.size}
+                                onChange={(e) =>
+                                  setEditingVariant((prev) =>
+                                    prev ? { ...prev, size: e.target.value } : prev
+                                  )
+                                }
+                              />
+                              <Input
+                                className="h-7 text-sm"
+                                placeholder="اللون"
+                                value={editingVariant.color}
+                                onChange={(e) =>
+                                  setEditingVariant((prev) =>
+                                    prev ? { ...prev, color: e.target.value } : prev
+                                  )
+                                }
+                              />
+                              <Input
+                                className="h-7 text-sm"
+                                placeholder="السعر"
+                                type="number"
+                                value={editingVariant.price}
+                                onChange={(e) =>
+                                  setEditingVariant((prev) =>
+                                    prev ? { ...prev, price: e.target.value } : prev
+                                  )
+                                }
+                              />
+                              <Input
+                                className="h-7 text-sm"
+                                placeholder="المخزون"
+                                type="number"
+                                value={editingVariant.stock}
+                                onChange={(e) =>
+                                  setEditingVariant((prev) =>
+                                    prev ? { ...prev, stock: e.target.value } : prev
+                                  )
+                                }
+                              />
+                              <div className="flex gap-1">
+                                <Button
+                                  size="sm"
+                                  className="h-7 flex-1 text-xs"
+                                  disabled={
+                                    !editingVariant.size ||
+                                    !editingVariant.color ||
+                                    !editingVariant.price ||
+                                    updateVariantMutation.isPending
+                                  }
+                                  onClick={() =>
+                                    updateVariantMutation.mutate({
+                                      productId: product.id,
+                                      variantId: v.id,
+                                      data: {
+                                        size: editingVariant.size,
+                                        color: editingVariant.color,
+                                        price: Number(editingVariant.price),
+                                        stock: Number(editingVariant.stock),
+                                      },
+                                    })
+                                  }
+                                >
+                                  {updateVariantMutation.isPending ? (
+                                    <Loader2 className="h-3 w-3 animate-spin" />
+                                  ) : (
+                                    "حفظ"
+                                  )}
+                                </Button>
+                                <Button
+                                  size="sm"
+                                  variant="ghost"
+                                  className="h-7 text-xs"
+                                  onClick={() => setEditingVariant(null)}
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        return (
+                          <div
+                            key={v.id}
+                            className="flex items-center gap-3 text-sm p-2 bg-muted/40 rounded"
+                          >
+                            <span className="font-medium min-w-[40px]">{v.size}</span>
+                            <div className="flex items-center gap-1.5">
+                              {(() => {
+                                const s = new Option().style;
+                                s.color = v.color;
+                                return s.color !== "" ? (
+                                  <span
+                                    className="w-4 h-4 rounded-full border border-border flex-shrink-0"
+                                    style={{ backgroundColor: v.color }}
+                                  />
+                                ) : null;
+                              })()}
+                              <span className="text-muted-foreground">{v.color}</span>
+                            </div>
+                            <span className="text-muted-foreground">{v.price.toFixed(2)} ج.م</span>
+                            <span
+                              className={`${v.stock === 0 ? "text-rose-500" : "text-muted-foreground"}`}
+                            >
+                              مخزون: {v.stock}
+                            </span>
+                            <div className="mr-auto flex items-center gap-1">
+                              <button
+                                className="text-muted-foreground hover:text-foreground transition-colors duration-200"
+                                title="تعديل"
+                                onClick={() =>
+                                  setEditingVariant({
+                                    productId: product.id,
+                                    variantId: v.id,
+                                    size: v.size,
+                                    color: v.color,
+                                    price: String(v.price),
+                                    stock: String(v.stock),
+                                  })
+                                }
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </button>
+                              <button
+                                className="text-muted-foreground hover:text-destructive transition-colors duration-200"
+                                onClick={() =>
+                                  deleteVariantMutation.mutate({
+                                    productId: product.id,
+                                    variantId: v.id,
+                                  })
+                                }
+                              >
+                                <X className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
                           </div>
-                          <span className="text-muted-foreground">{v.price.toFixed(2)} ج.م</span>
-                          <span
-                            className={`${v.stock === 0 ? "text-rose-500" : "text-muted-foreground"}`}
-                          >
-                            مخزون: {v.stock}
-                          </span>
-                          <button
-                            className="mr-auto text-muted-foreground hover:text-destructive transition-colors duration-200"
-                            onClick={() =>
-                              deleteVariantMutation.mutate({
-                                productId: product.id,
-                                variantId: v.id,
-                              })
-                            }
-                          >
-                            <X className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
                     <p className="text-sm text-muted-foreground mb-3">لا توجد متغيرات</p>
