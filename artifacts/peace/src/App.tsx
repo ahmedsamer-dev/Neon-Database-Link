@@ -1,8 +1,9 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Switch, Route, Router as WouterRouter, Redirect, useLocation } from "wouter";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { CartProvider } from "@/lib/cart";
 import { WishlistProvider } from "@/lib/wishlist";
@@ -41,6 +42,39 @@ const queryClient = new QueryClient({
   },
 });
 
+const pageVariants = {
+  initial: { opacity: 0, y: 16 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -8 },
+};
+
+const pageTransition = {
+  duration: 0.3,
+  ease: [0.22, 1, 0.36, 1],
+};
+
+function PageTransition({ children }: { children: React.ReactNode }) {
+  return (
+    <motion.div
+      variants={pageVariants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
+      transition={pageTransition}
+    >
+      {children}
+    </motion.div>
+  );
+}
+
+function ScrollToTop() {
+  const [location] = useLocation();
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location]);
+  return null;
+}
+
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[40vh]">
@@ -66,91 +100,98 @@ function Router() {
   const isAdminRoute = location.startsWith("/admin") && location !== "/admin/login";
 
   return (
-    <Switch>
-      <Route path="/" component={() => <Layout><Home /></Layout>} />
-      <Route
-        path="/products/:id"
-        component={() => <Layout><ProductDetail /></Layout>}
-      />
-      <Route
-        path="/checkout"
-        component={() => (
-          <Layout>
-            <Suspense fallback={<PageLoader />}>
-              <Checkout />
-            </Suspense>
-          </Layout>
-        )}
-      />
-      <Route
-        path="/order-confirmation/:id"
-        component={() => (
-          <Layout>
-            <Suspense fallback={<PageLoader />}>
-              <OrderConfirmation />
-            </Suspense>
-          </Layout>
-        )}
-      />
-      <Route
-        path="/about"
-        component={() => (
-          <Layout>
-            <Suspense fallback={<PageLoader />}>
-              <About />
-            </Suspense>
-          </Layout>
-        )}
-      />
-      <Route
-        path="/wishlist"
-        component={() => (
-          <Layout>
-            <Suspense fallback={<PageLoader />}>
-              <WishlistPage />
-            </Suspense>
-          </Layout>
-        )}
-      />
+    <>
+      <ScrollToTop />
+      <AnimatePresence mode="wait" initial={false}>
+        <PageTransition key={location}>
+          <Switch>
+            <Route path="/" component={() => <Layout><Home /></Layout>} />
+            <Route
+              path="/products/:id"
+              component={() => <Layout><ProductDetail /></Layout>}
+            />
+            <Route
+              path="/checkout"
+              component={() => (
+                <Layout>
+                  <Suspense fallback={<PageLoader />}>
+                    <Checkout />
+                  </Suspense>
+                </Layout>
+              )}
+            />
+            <Route
+              path="/order-confirmation/:id"
+              component={() => (
+                <Layout>
+                  <Suspense fallback={<PageLoader />}>
+                    <OrderConfirmation />
+                  </Suspense>
+                </Layout>
+              )}
+            />
+            <Route
+              path="/about"
+              component={() => (
+                <Layout>
+                  <Suspense fallback={<PageLoader />}>
+                    <About />
+                  </Suspense>
+                </Layout>
+              )}
+            />
+            <Route
+              path="/wishlist"
+              component={() => (
+                <Layout>
+                  <Suspense fallback={<PageLoader />}>
+                    <WishlistPage />
+                  </Suspense>
+                </Layout>
+              )}
+            />
 
-      <Route
-        path="/admin/login"
-        component={() => (
-          <Suspense fallback={<PageLoader />}>
-            <AdminLogin />
-          </Suspense>
-        )}
-      />
+            <Route
+              path="/admin/login"
+              component={() => (
+                <Suspense fallback={<PageLoader />}>
+                  <AdminLogin />
+                </Suspense>
+              )}
+            />
 
-      <Route path="/admin" component={() => <ProtectedRoute component={AdminDashboard} />} />
-      <Route path="/admin/orders" component={() => <ProtectedRoute component={AdminOrders} />} />
-      <Route
-        path="/admin/orders/:id"
-        component={() => <ProtectedRoute component={AdminOrderDetail} />}
-      />
-      <Route
-        path="/admin/notifications"
-        component={() => <ProtectedRoute component={AdminNotifications} />}
-      />
-      <Route
-        path="/admin/products"
-        component={() => <ProtectedRoute component={AdminProducts} />}
-      />
-      <Route
-        path="/admin/settings"
-        component={() => <ProtectedRoute component={AdminSettings} />}
-      />
+            <Route path="/admin" component={() => <ProtectedRoute component={AdminDashboard} />} />
+            <Route path="/admin/orders" component={() => <ProtectedRoute component={AdminOrders} />} />
+            <Route
+              path="/admin/orders/:id"
+              component={() => <ProtectedRoute component={AdminOrderDetail} />}
+            />
+            <Route
+              path="/admin/notifications"
+              component={() => <ProtectedRoute component={AdminNotifications} />}
+            />
+            <Route
+              path="/admin/products"
+              component={() => <ProtectedRoute component={AdminProducts} />}
+            />
+            <Route
+              path="/admin/settings"
+              component={() => <ProtectedRoute component={AdminSettings} />}
+            />
 
-      <Route
-        component={() =>
-          isAdminRoute ? (
-            <AdminLayout><NotFound /></AdminLayout>
-          ) : (
-            <Layout><NotFound /></Layout>
-          )
-        }
-      />
-    </Switch>
+            <Route
+              component={() =>
+                isAdminRoute ? (
+                  <AdminLayout><NotFound /></AdminLayout>
+                ) : (
+                  <Layout><NotFound /></Layout>
+                )
+              }
+            />
+          </Switch>
+        </PageTransition>
+      </AnimatePresence>
+    </>
   );
 }
 
