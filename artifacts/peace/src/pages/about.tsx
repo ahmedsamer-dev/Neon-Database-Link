@@ -3,10 +3,10 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 
 const fadeUp = {
-  initial: { opacity: 0, y: 30 },
+  initial: { opacity: 0, y: 40 },
   whileInView: { opacity: 1, y: 0 },
-  viewport: { once: true, margin: "-80px" },
-  transition: { duration: 0.6, ease: "easeOut" },
+  viewport: { once: true, margin: "-60px" },
+  transition: { duration: 0.65, ease: [0.22, 1, 0.36, 1] },
 };
 
 const pillars = [
@@ -16,26 +16,65 @@ const pillars = [
   { ar: "سعر صادق", en: "Fair Price" },
 ];
 
+const products = [
+  {
+    title: "تيشيرتات أوفر سايز",
+    desc: "مصممة من أجود أنواع الأقطان الطبيعية. ناعمة على الجلد، مريحة للروح.",
+    icon: "👕",
+    label: "Oversized Tees",
+  },
+  {
+    title: "هوديز & سويتشيرتات",
+    desc: "دفء لا يُقاوم مع تصاميم محكمة تناسب كل مناسبة من الصباح للمساء.",
+    icon: "🧥",
+    label: "Hoodies",
+  },
+  {
+    title: "إكسسوارات مختارة",
+    desc: "تفاصيل صغيرة تصنع الفارق. اكتمل إطلالتك بلمسة Peace الهادئة.",
+    icon: "🎒",
+    label: "Accessories",
+  },
+];
+
+const reasons = [
+  {
+    title: "جودة لا تُساوم",
+    desc: "نختار أقمشتنا بعناية شديدة لضمان الراحة والمتانة معاً. قطعك من Peace تصحبك لسنوات.",
+    icon: "✨",
+  },
+  {
+    title: "تصاميم خالدة",
+    desc: "بعيداً عن صخب الموضة السريعة، نصنع قطعاً تتجاوز الموسم. ترتديها اليوم وتحبها بعد خمس سنوات.",
+    icon: "🎨",
+  },
+  {
+    title: "سعر عادل حقيقي",
+    desc: "نؤمن أن الجودة الحقيقية يجب أن تكون في متناول الجميع. أسعارنا صادقة تعكس القيمة الفعلية.",
+    icon: "💎",
+  },
+  {
+    title: "خدمة تشعرك باهتمام",
+    desc: "من لحظة طلبك حتى وصوله إليك، فريقنا موجود لك. راحتك أولويتنا الأولى والأخيرة.",
+    icon: "🤝",
+  },
+];
+
 export default function About() {
   return (
     <div className="flex flex-col w-full" dir="rtl">
 
-      {/* ═══ HERO — full-bleed editorial ═══ */}
+      {/* ═══ HERO ═══ */}
       <section className="relative h-[90vh] min-h-[600px] w-full flex flex-col items-center justify-end overflow-hidden bg-neutral-900">
-        {/* background image */}
         <img
           src="/about-hero.jpg"
           alt="PEACE clothing brand"
           className="absolute inset-0 w-full h-full object-cover object-center"
           style={{ opacity: 0.55 }}
         />
-
-        {/* gradient overlay — stronger at bottom */}
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/90 via-neutral-900/30 to-transparent" />
 
-        {/* hero content — anchored to bottom */}
         <div className="relative z-10 w-full px-6 md:px-16 pb-16 max-w-6xl mx-auto">
-          {/* label */}
           <motion.span
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
@@ -45,18 +84,16 @@ export default function About() {
             Clothing Brand · Egypt · Est. 2024
           </motion.span>
 
-          {/* brand name */}
           <motion.h1
-            initial={{ opacity: 0, y: 24 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
             className="font-serif font-bold text-white leading-none tracking-tight"
             style={{ fontSize: "clamp(3.5rem, 10vw, 9rem)" }}
           >
             PEACE.
           </motion.h1>
 
-          {/* tagline */}
           <motion.p
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -67,7 +104,6 @@ export default function About() {
             <span className="text-white/40 text-base">Wear the calm.</span>
           </motion.p>
 
-          {/* pillars row */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -84,7 +120,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* ═══ MANIFESTO STRIP ═══ */}
+      {/* ═══ SCROLLING MANIFESTO STRIP ═══ */}
       <section className="bg-foreground text-background py-10 overflow-hidden">
         <motion.div
           initial={{ x: 0 }}
@@ -95,27 +131,25 @@ export default function About() {
         >
           {Array.from({ length: 8 }).map((_, i) => (
             <span key={i} className="flex items-center gap-12">
-              <span>PEACE</span>
+              <span>PEACE 🕊️</span>
               <span className="text-background/20">·</span>
               <span>Wear the calm</span>
               <span className="text-background/20">·</span>
-              <span>ارتدِ هدوءك</span>
+              <span>ارتدِ هدوءك ✨</span>
               <span className="text-background/20">·</span>
-              <span>Cotton Quality</span>
+              <span>Cotton Quality 👕</span>
               <span className="text-background/20">·</span>
             </span>
           ))}
         </motion.div>
       </section>
 
-      {/* ═══ من نحن — brand story ═══ */}
+      {/* ═══ من نحن ═══ */}
       <section className="py-24 container mx-auto px-4 md:px-16 max-w-5xl">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp} className="order-2 md:order-1">
             <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4 block">Our Story</span>
-            <h2 className="text-4xl font-serif font-bold mb-6 tracking-tight leading-tight">
-              من نحن
-            </h2>
+            <h2 className="text-4xl font-serif font-bold mb-6 tracking-tight leading-tight">من نحن</h2>
             <p className="text-muted-foreground leading-relaxed text-base mb-4">
               Peace. ليست مجرد علامة تجارية للملابس — إنها فلسفة حياة. أُسِّست بإيمان راسخ بأن ما
               ترتديه يعكس من أنت من الداخل. نؤمن بأن الهدوء والتوازن يمكن أن يُعبَّر عنهما من خلال
@@ -128,8 +162,10 @@ export default function About() {
           </motion.div>
 
           <motion.div
-            {...fadeUp}
-            transition={{ duration: 0.6, delay: 0.15 }}
+            initial={{ opacity: 0, scale: 0.96, y: 20 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, margin: "-60px" }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1], delay: 0.15 }}
             className="order-1 md:order-2 aspect-[4/5] bg-muted rounded-sm overflow-hidden"
           >
             <img
@@ -141,7 +177,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* ═══ ماذا نقدم ═══ */}
+      {/* ═══ ماذا نقدم — with emojis ═══ */}
       <section className="bg-secondary/50 py-24">
         <div className="container mx-auto px-4 md:px-16 max-w-5xl">
           <motion.div {...fadeUp} className="text-center mb-16">
@@ -153,31 +189,26 @@ export default function About() {
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                title: "تيشيرتات أوفر سايز",
-                desc: "مصممة من أجود أنواع الأقطان الطبيعية. ناعمة على الجلد، مريحة للروح.",
-                label: "Oversized Tees",
-              },
-              {
-                title: "هوديز & سويتشيرتات",
-                desc: "دفء لا يُقاوم مع تصاميم محكمة تناسب كل مناسبة من الصباح للمساء.",
-                label: "Hoodies",
-              },
-              {
-                title: "إكسسوارات مختارة",
-                desc: "تفاصيل صغيرة تصنع الفارق. اكتمل إطلالتك بلمسة Peace الهادئة.",
-                label: "Accessories",
-              },
-            ].map((item, i) => (
+            {products.map((item, i) => (
               <motion.div
                 key={i}
-                {...fadeUp}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                className="bg-background p-8 rounded-sm border border-border/50 hover:border-foreground/20 transition-colors duration-300"
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.55, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ y: -6, transition: { duration: 0.25 } }}
+                className="bg-background p-8 rounded-sm text-center cursor-default"
               >
-                <span className="text-[10px] uppercase tracking-[0.3em] text-muted-foreground mb-4 block">{item.label}</span>
-                <h3 className="font-semibold text-lg mb-3 font-serif">{item.title}</h3>
+                <motion.div
+                  initial={{ scale: 0.5, opacity: 0 }}
+                  whileInView={{ scale: 1, opacity: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: i * 0.12 + 0.2, type: "spring", stiffness: 200 }}
+                  className="text-5xl mb-5"
+                >
+                  {item.icon}
+                </motion.div>
+                <h3 className="font-semibold text-lg mb-3">{item.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
               </motion.div>
             ))}
@@ -185,7 +216,7 @@ export default function About() {
         </div>
       </section>
 
-      {/* ═══ لماذا نحن الأفضل ═══ */}
+      {/* ═══ لماذا نحن الأفضل — with emojis ═══ */}
       <section className="py-24 container mx-auto px-4 md:px-16 max-w-4xl">
         <motion.div {...fadeUp} className="text-center mb-16">
           <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-3 block">Why Us</span>
@@ -196,33 +227,17 @@ export default function About() {
         </motion.div>
 
         <div className="grid md:grid-cols-2 gap-6">
-          {[
-            {
-              title: "جودة لا تُساوم",
-              desc: "نختار أقمشتنا بعناية شديدة لضمان الراحة والمتانة معاً. قطعك من Peace تصحبك لسنوات.",
-            },
-            {
-              title: "تصاميم خالدة",
-              desc: "بعيداً عن صخب الموضة السريعة، نصنع قطعاً تتجاوز الموسم. ترتديها اليوم وتحبها بعد خمس سنوات.",
-            },
-            {
-              title: "سعر عادل حقيقي",
-              desc: "نؤمن أن الجودة الحقيقية يجب أن تكون في متناول الجميع. أسعارنا صادقة تعكس القيمة الفعلية.",
-            },
-            {
-              title: "خدمة تشعرك باهتمام",
-              desc: "من لحظة طلبك حتى وصوله إليك، فريقنا موجود لك. راحتك أولويتنا الأولى والأخيرة.",
-            },
-          ].map((item, i) => (
+          {reasons.map((item, i) => (
             <motion.div
               key={i}
-              {...fadeUp}
-              transition={{ duration: 0.5, delay: i * 0.1 }}
-              className="flex gap-5 p-6 border rounded-sm hover:bg-muted/30 transition-colors duration-200"
+              initial={{ opacity: 0, x: i % 2 === 0 ? 30 : -30 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, margin: "-40px" }}
+              transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+              whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+              className="flex gap-5 p-6 border rounded-sm hover:bg-muted/30 transition-colors duration-200 cursor-default"
             >
-              <div className="flex-shrink-0 w-8 h-8 rounded-full border border-border flex items-center justify-center text-xs text-muted-foreground font-medium">
-                {String(i + 1).padStart(2, "0")}
-              </div>
+              <div className="flex-shrink-0 text-3xl leading-none mt-1">{item.icon}</div>
               <div>
                 <h3 className="font-semibold mb-2">{item.title}</h3>
                 <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
@@ -235,20 +250,36 @@ export default function About() {
       {/* ═══ CTA ═══ */}
       <section className="relative overflow-hidden bg-foreground text-background py-24">
         <div className="container mx-auto px-4 text-center max-w-2xl relative z-10">
-          <motion.div {...fadeUp}>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              whileInView={{ scale: 1, opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
+              className="text-5xl mb-6"
+            >
+              🕊️
+            </motion.div>
             <span className="text-xs uppercase tracking-[0.3em] text-background/40 mb-4 block">Ready?</span>
             <h2 className="text-4xl font-serif font-bold mb-4 leading-tight">ابدأ رحلتك مع Peace.</h2>
             <p className="text-background/60 mb-10 leading-relaxed text-lg">
               استكشف مجموعتنا المختارة بعناية<br />واختر ما يعكس هويتك الحقيقية
             </p>
-            <Button
-              asChild
-              size="lg"
-              variant="outline"
-              className="bg-transparent border-background/40 text-background hover:bg-background hover:text-foreground transition-all duration-300 hover:scale-[1.02] px-12 rounded-sm"
-            >
-              <Link href="/">تسوق الآن ←</Link>
-            </Button>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="bg-transparent border-background/40 text-background hover:bg-background hover:text-foreground transition-all duration-300 px-12 rounded-sm"
+              >
+                <Link href="/">تسوق الآن ←</Link>
+              </Button>
+            </motion.div>
           </motion.div>
         </div>
       </section>
