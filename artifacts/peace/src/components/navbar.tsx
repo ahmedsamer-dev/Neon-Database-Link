@@ -34,12 +34,6 @@ export function Navbar() {
             >
               من نحن
             </Link>
-            <Link
-              href="/track"
-              className={`hover:text-foreground transition-colors duration-200 ${location === "/track" ? "text-foreground" : ""}`}
-            >
-              تتبع طلبك
-            </Link>
           </div>
         </div>
 

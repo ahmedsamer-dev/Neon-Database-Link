@@ -17,7 +17,6 @@ import NotFound from "@/pages/not-found";
 const Checkout = lazy(() => import("@/pages/checkout"));
 const OrderConfirmation = lazy(() => import("@/pages/order-confirmation"));
 const About = lazy(() => import("@/pages/about"));
-const TrackOrder = lazy(() => import("@/pages/track-order"));
 const WishlistPage = lazy(() => import("@/pages/wishlist"));
 
 const AdminLogin = lazy(() => import("@/pages/admin/login"));
@@ -99,16 +98,6 @@ function Router() {
           <Layout>
             <Suspense fallback={<PageLoader />}>
               <About />
-            </Suspense>
-          </Layout>
-        )}
-      />
-      <Route
-        path="/track"
-        component={() => (
-          <Layout>
-            <Suspense fallback={<PageLoader />}>
-              <TrackOrder />
             </Suspense>
           </Layout>
         )}

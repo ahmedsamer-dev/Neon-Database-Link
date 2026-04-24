@@ -1,8 +1,8 @@
 {
-  "buildCommand": "cd ../.. && pnpm install && PORT=3000 BASE_PATH=/ pnpm --filter @workspace/peace run build",
+  "buildCommand": "cd ../.. && pnpm install && pnpm --filter @workspace/api-server run build && PORT=3000 BASE_PATH=/ pnpm --filter @workspace/peace run build",
   "outputDirectory": "public",
   "functions": {
-    "api/index.ts": {
+    "api/index.js": {
       "maxDuration": 30
     }
   },
