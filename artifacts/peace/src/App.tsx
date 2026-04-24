@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 
 import { CartProvider } from "@/lib/cart";
+import { WishlistProvider } from "@/lib/wishlist";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { Layout } from "@/components/layout";
 import { AdminLayout } from "@/components/admin-layout";
@@ -16,6 +17,8 @@ import NotFound from "@/pages/not-found";
 const Checkout = lazy(() => import("@/pages/checkout"));
 const OrderConfirmation = lazy(() => import("@/pages/order-confirmation"));
 const About = lazy(() => import("@/pages/about"));
+const TrackOrder = lazy(() => import("@/pages/track-order"));
+const WishlistPage = lazy(() => import("@/pages/wishlist"));
 
 const AdminLogin = lazy(() => import("@/pages/admin/login"));
 const AdminDashboard = lazy(() => import("@/pages/admin/dashboard"));
@@ -100,6 +103,26 @@ function Router() {
           </Layout>
         )}
       />
+      <Route
+        path="/track"
+        component={() => (
+          <Layout>
+            <Suspense fallback={<PageLoader />}>
+              <TrackOrder />
+            </Suspense>
+          </Layout>
+        )}
+      />
+      <Route
+        path="/wishlist"
+        component={() => (
+          <Layout>
+            <Suspense fallback={<PageLoader />}>
+              <WishlistPage />
+            </Suspense>
+          </Layout>
+        )}
+      />
 
       <Route
         path="/admin/login"
@@ -147,11 +170,13 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <AuthProvider>
-          <CartProvider>
-            <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
-              <Router />
-            </WouterRouter>
-          </CartProvider>
+          <WishlistProvider>
+            <CartProvider>
+              <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+                <Router />
+              </WouterRouter>
+            </CartProvider>
+          </WishlistProvider>
         </AuthProvider>
         <Toaster />
       </TooltipProvider>

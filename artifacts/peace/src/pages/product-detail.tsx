@@ -1,6 +1,6 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
-import { useGetProduct } from "@workspace/api-client-react";
+import { useGetProduct, useListProducts } from "@workspace/api-client-react";
 import { useCart } from "@/lib/cart";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +17,10 @@ import {
 import { Minus, Plus, ShoppingBag, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
-import { toast } from "sonner";
+import { WishlistButton } from "@/components/wishlist-button";
+import { SizeGuide } from "@/components/size-guide";
+import { trackView } from "@/lib/recently-viewed";
+import { useStoreSettings, buildWhatsAppUrl } from "@/lib/store-settings";
 
 function isValidColor(str: string): boolean {
   const s = new Option().style;
@@ -28,8 +31,30 @@ function isValidColor(str: string): boolean {
 export default function ProductDetail() {
   const { id } = useParams<{ id: string }>();
   const { data: product, isLoading, error } = useGetProduct(id, { query: { enabled: !!id } });
+  const { data: allProducts } = useListProducts();
+  const { data: settings } = useStoreSettings();
   const { addItem, items } = useCart();
   const [, navigate] = useLocation();
+
+  useEffect(() => {
+    if (product?.id) trackView(product.id);
+  }, [product?.id]);
+
+  const totalProductStock = useMemo(
+    () => product?.variants.reduce((sum, v) => sum + v.stock, 0) ?? 0,
+    [product],
+  );
+  const isLowStockProduct =
+    product && totalProductStock > 0 && totalProductStock <= 5;
+
+  const relatedProducts = useMemo(
+    () =>
+      (allProducts || [])
+        .filter((p) => p.isActive && p.id !== product?.id)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 4),
+    [allProducts, product?.id],
+  );
 
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -172,12 +197,28 @@ export default function ProductDetail() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
           >
-            <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight mb-2">
-              {product.name}
-            </h1>
-            <p className="text-xl text-muted-foreground mb-6">
-              {priceToDisplay?.toFixed(2)} ج.م
-            </p>
+            <div className="flex items-start justify-between gap-4 mb-2">
+              <h1 className="text-3xl md:text-4xl font-serif font-bold tracking-tight">
+                {product.name}
+              </h1>
+              <div className="flex-shrink-0">
+                <WishlistButton
+                  productId={product.id}
+                  productName={product.name}
+                  variant="inline"
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-3 mb-6">
+              <p className="text-xl text-muted-foreground">
+                {priceToDisplay?.toFixed(2)} ج.م
+              </p>
+              {isLowStockProduct && (
+                <span className="bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-300 text-xs font-semibold px-2.5 py-1 rounded-full">
+                  آخر {totalProductStock} قطع متاحة
+                </span>
+              )}
+            </div>
 
             <div className="prose prose-sm text-muted-foreground mb-8">
               <p>{product.description}</p>
@@ -232,7 +273,10 @@ export default function ProductDetail() {
                   animate={{ opacity: 1, height: "auto" }}
                 >
                   <div className="flex justify-between items-center mb-3">
-                    <span className="text-sm font-medium">المقاس</span>
+                    <div className="flex items-center gap-3">
+                      <span className="text-sm font-medium">المقاس</span>
+                      <SizeGuide />
+                    </div>
                     <span className="text-sm text-muted-foreground">
                       {selectedSize || "اختر مقاساً"}
                     </span>
@@ -316,10 +360,75 @@ export default function ProductDetail() {
                     : "نفذت الكمية"}
                 </p>
               )}
+
+              {settings?.whatsappPhone && (
+                <a
+                  href={buildWhatsAppUrl(
+                    settings.whatsappPhone,
+                    `مرحباً ${settings.storeName}، أريد الاستفسار عن "${product.name}"${
+                      selectedColor ? ` — اللون: ${selectedColor}` : ""
+                    }${selectedSize ? ` — المقاس: ${selectedSize}` : ""}.`,
+                  )}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full h-11 border border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white rounded-sm text-sm font-medium transition-colors duration-200"
+                >
+                  <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884" />
+                  </svg>
+                  استفسر عبر واتساب
+                </a>
+              )}
             </div>
           </motion.div>
         </div>
       </div>
+
+      {relatedProducts.length > 0 && (
+        <section className="mt-24 pt-16 border-t border-border">
+          <div className="mb-10">
+            <span className="block text-xs uppercase tracking-[0.25em] text-muted-foreground mb-3">
+              You may also like
+            </span>
+            <h2 className="text-2xl md:text-3xl font-serif font-bold tracking-tight">
+              قد يعجبك أيضاً
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+            {relatedProducts.map((rp) => (
+              <div key={rp.id} className="group flex flex-col card-premium">
+                <Link
+                  href={`/products/${rp.id}`}
+                  className="block aspect-[3/4] relative overflow-hidden bg-muted rounded-sm mb-3"
+                >
+                  {rp.images?.[0] ? (
+                    <img
+                      src={rp.images[0]}
+                      alt={rp.name}
+                      className="w-full h-full object-cover image-premium"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center bg-secondary text-secondary-foreground font-serif">
+                      Peace.
+                    </div>
+                  )}
+                </Link>
+                <div className="flex justify-between items-start gap-2 px-1 text-sm">
+                  <Link
+                    href={`/products/${rp.id}`}
+                    className="font-medium link-premium inline-block truncate"
+                  >
+                    {rp.name}
+                  </Link>
+                  <span className="font-medium whitespace-nowrap">
+                    {rp.basePrice.toFixed(2)} ج.م
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <AlertDialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <AlertDialogContent dir="rtl">

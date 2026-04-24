@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useCart } from "@/lib/cart";
+import { useWishlist } from "@/lib/wishlist";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { ShoppingBag, Minus, Plus, Trash2 } from "lucide-react";
+import { ShoppingBag, Minus, Plus, Trash2, Heart } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ThemeToggle } from "@/components/theme-toggle";
 
 export function Navbar() {
   const [location] = useLocation();
   const { items, cartCount, cartTotal, updateQuantity, removeItem } = useCart();
+  const { count: wishlistCount } = useWishlist();
   const [isOpen, setIsOpen] = useState(false);
 
   return (
@@ -32,11 +34,32 @@ export function Navbar() {
             >
               من نحن
             </Link>
+            <Link
+              href="/track"
+              className={`hover:text-foreground transition-colors duration-200 ${location === "/track" ? "text-foreground" : ""}`}
+            >
+              تتبع طلبك
+            </Link>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1">
           <ThemeToggle />
+          <Link href="/wishlist">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="relative transition-all duration-200 hover:scale-110"
+              aria-label="المفضلة"
+            >
+              <Heart className="h-5 w-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute top-1 left-1 h-4 w-4 rounded-full bg-rose-500 text-white text-[10px] font-medium flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
+            </Button>
+          </Link>
           <Sheet open={isOpen} onOpenChange={setIsOpen}>
             <SheetTrigger asChild>
               <Button
