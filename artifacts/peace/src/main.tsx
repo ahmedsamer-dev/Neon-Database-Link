@@ -2,10 +2,15 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 import "./index.css";
 import { setBaseUrl } from "@workspace/api-client-react";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const apiBaseUrl = import.meta.env.VITE_API_BASE_URL as string | undefined;
 if (apiBaseUrl) {
   setBaseUrl(apiBaseUrl);
 }
 
-createRoot(document.getElementById("root")!).render(<App />);
+createRoot(document.getElementById("root")!).render(
+  <ThemeProvider>
+    <App />
+  </ThemeProvider>,
+);
