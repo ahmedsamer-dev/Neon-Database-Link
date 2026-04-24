@@ -1,6 +1,7 @@
 import app from "./app";
 import { logger } from "./lib/logger";
 import { pool } from "@workspace/db";
+import { startCleanupJob } from "./cleanup.js";
 
 const rawPort = process.env["PORT"];
 
@@ -22,6 +23,7 @@ const server = app.listen(port, (err) => {
     process.exit(1);
   }
   logger.info({ port }, "Server listening");
+  startCleanupJob();
 });
 
 async function shutdown(signal: string) {
