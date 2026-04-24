@@ -184,14 +184,59 @@
 }
 
 @layer components {
-  .btn-premium {
-    @apply relative overflow-hidden transition-all duration-300 ease-out;
+  .hover-elevate {
+    @apply transition-all duration-300 ease-out;
   }
-  .btn-premium::after {
+  .hover-elevate:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px -2px hsl(var(--foreground) / 0.12);
+  }
+  .active-elevate-2:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 3px -1px hsl(var(--foreground) / 0.15);
+    transition-duration: 80ms;
+  }
+
+  .card-premium {
+    @apply transition-all duration-500 ease-out;
+  }
+  .card-premium:hover {
+    transform: translateY(-4px);
+  }
+
+  .image-premium {
+    @apply transition-transform duration-700 ease-out;
+  }
+  .group:hover .image-premium {
+    transform: scale(1.06);
+  }
+
+  .link-premium {
+    position: relative;
+    @apply transition-colors duration-200;
+  }
+  .link-premium::after {
     content: "";
-    @apply absolute inset-0 bg-foreground/10 opacity-0 transition-opacity duration-300;
+    position: absolute;
+    bottom: -2px;
+    right: 0;
+    left: 0;
+    height: 1px;
+    background-color: currentColor;
+    transform: scaleX(0);
+    transform-origin: right;
+    @apply transition-transform duration-300 ease-out;
   }
-  .btn-premium:hover::after {
-    @apply opacity-100;
+  .link-premium:hover::after,
+  .link-premium[data-active="true"]::after {
+    transform: scaleX(1);
+    transform-origin: left;
   }
+}
+
+:root {
+  --button-outline: hsl(var(--border));
+}
+.dark {
+  --button-outline: hsl(var(--border));
 }
