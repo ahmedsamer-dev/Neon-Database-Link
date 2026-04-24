@@ -144,9 +144,10 @@ export default function Home() {
           <img
             src="/hero.jpg"
             alt="Peace fashion"
-            className="w-full h-full object-cover opacity-70 mix-blend-multiply"
+            className="w-full h-full object-cover object-center scale-105"
+            style={{ opacity: 0.55 }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-background/30" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/80 via-background/20 to-background/10" />
         </div>
         <div className="relative z-10 text-center px-4 max-w-3xl mx-auto flex flex-col items-center">
           <motion.span

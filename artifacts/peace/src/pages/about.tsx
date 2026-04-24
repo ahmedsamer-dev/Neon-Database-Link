@@ -18,8 +18,10 @@ export default function About() {
           <img
             src="/hero.jpg"
             alt="Peace brand"
-            className="w-full h-full object-cover opacity-40 mix-blend-multiply"
+            className="w-full h-full object-cover object-center"
+            style={{ opacity: 0.45 }}
           />
+          <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/20 to-background/60" />
         </div>
         <div className="relative z-10 text-center px-4 max-w-2xl mx-auto">
           <motion.h1
@@ -62,9 +64,9 @@ export default function About() {
             className="aspect-square bg-muted rounded-sm overflow-hidden"
           >
             <img
-              src="/hero.jpg"
+              src="/about.jpg"
               alt="Peace brand story"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover object-top"
             />
           </motion.div>
         </div>
