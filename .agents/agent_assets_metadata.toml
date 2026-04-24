@@ -35,3 +35,27 @@ id = "wgtGjNJww_9aRTp804Vmu"
 uri = "file://artifacts/peace/public/hero.jpg"
 type = "image"
 title = "calm minimal aesthetic fashion lifestyle clean serene"
+
+[[outputs]]
+id = "x1UXRfxUX2pXRXnmLs2Oa"
+uri = "file://attached_assets/image_search/tshirt_flatlay.jpg"
+type = "image"
+title = "١ — Flat lay تيشيرتات محايدة"
+
+[[outputs]]
+id = "u_1ZVkQ-W4-CVY6g8yaGP"
+uri = "file://attached_assets/image_search/tshirt_hm1.jpg"
+type = "image"
+title = "٢ — تيشيرتات oversized مرتبة (beige/white)"
+
+[[outputs]]
+id = "fdLqZ3el0h8pa0BT22n2Y"
+uri = "file://attached_assets/image_search/tshirt_outfit.jpg"
+type = "image"
+title = "٣ — Outfit محايد oversized"
+
+[[outputs]]
+id = "YATVPQs9w1qkgV_sx9xIL"
+uri = "file://attached_assets/image_search/tshirt_minimal.jpg"
+type = "image"
+title = "٤ — Flat lay minimalist تيشيرت + sneakers"
