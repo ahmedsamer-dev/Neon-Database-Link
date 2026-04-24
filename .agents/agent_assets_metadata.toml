@@ -59,3 +59,27 @@ id = "YATVPQs9w1qkgV_sx9xIL"
 uri = "file://attached_assets/image_search/tshirt_minimal.jpg"
 type = "image"
 title = "٤ — Flat lay minimalist تيشيرت + sneakers"
+
+[[outputs]]
+id = "4lalO2Y5MkW-ZZZB68HWO"
+uri = "file://attached_assets/image_search/brand_campaign.jpg"
+type = "image"
+title = "١ — Campaign shot (clothing brand)"
+
+[[outputs]]
+id = "DXD3y9ZECCn_DOaJtBZkf"
+uri = "file://attached_assets/image_search/brand_shoot.jpg"
+type = "image"
+title = "٢ — Clothing brand photoshoot"
+
+[[outputs]]
+id = "RNDqYkY5a4Gr3YOD5mIk-"
+uri = "file://attached_assets/image_search/tshirt_photo.jpg"
+type = "image"
+title = "٣ — T-shirt product photography"
+
+[[outputs]]
+id = "DKZqbHOOxX78eL2n0faIa"
+uri = "file://attached_assets/image_search/product_photo.jpg"
+type = "image"
+title = "٤ — Product photo تيشيرت"
