@@ -19,7 +19,6 @@ interface OrderItem {
 interface Order {
   id: string;
   customerName: string;
-  phone: string;
   totalAmount: number;
   paymentStatus: string;
   orderStatus: string;
@@ -95,24 +94,30 @@ function StatusTimeline({ status }: { status: string }) {
 
 export default function TrackOrder() {
   const [codeInput, setCodeInput] = useState("");
-  const [submittedCode, setSubmittedCode] = useState<string | null>(null);
+  const [phoneInput, setPhoneInput] = useState("");
+  const [submitted, setSubmitted] = useState<{ code: string; phone: string } | null>(
+    null,
+  );
 
   const { data: order, isLoading, error } = useQuery<Order>({
-    queryKey: ["track-order", submittedCode],
+    queryKey: ["track-order", submitted?.code, submitted?.phone],
     queryFn: async () => {
-      const res = await fetch(`/api/orders/${encodeURIComponent(submittedCode!)}`);
+      const res = await fetch(
+        `/api/orders/${encodeURIComponent(submitted!.code)}?phone=${encodeURIComponent(submitted!.phone)}`,
+      );
       if (!res.ok) throw new Error("Order not found");
       return res.json();
     },
-    enabled: !!submittedCode,
+    enabled: !!submitted,
     retry: false,
   });
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const trimmed = codeInput.trim();
-    if (!trimmed) return;
-    setSubmittedCode(trimmed);
+    const trimmedCode = codeInput.trim();
+    const trimmedPhone = phoneInput.replace(/\D/g, "");
+    if (!trimmedCode || trimmedPhone.length < 4) return;
+    setSubmitted({ code: trimmedCode, phone: trimmedPhone.slice(-4) });
   };
 
   return (
@@ -130,25 +135,45 @@ export default function TrackOrder() {
             تتبع طلبك
           </h1>
           <p className="text-muted-foreground">
-            ادخل رقم الطلب الذي وصلك بعد إتمام الشراء (مثال: ORD-0001)
+            ادخل رقم الطلب وآخر 4 أرقام من رقم الهاتف الذي تم استخدامه عند الطلب
           </p>
         </div>
 
-        <form onSubmit={onSubmit} className="flex gap-3 mb-10">
-          <div className="flex-1">
-            <Label htmlFor="order-code" className="sr-only">
-              رقم الطلب
-            </Label>
-            <Input
-              id="order-code"
-              placeholder="ORD-0001"
-              value={codeInput}
-              onChange={(e) => setCodeInput(e.target.value)}
-              className="h-12 text-base"
-              dir="ltr"
-            />
+        <form onSubmit={onSubmit} className="space-y-4 mb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div>
+              <Label htmlFor="order-code" className="text-sm mb-2 block">
+                رقم الطلب
+              </Label>
+              <Input
+                id="order-code"
+                placeholder="ORD-0001"
+                value={codeInput}
+                onChange={(e) => setCodeInput(e.target.value)}
+                className="h-12 text-base"
+                dir="ltr"
+              />
+            </div>
+            <div>
+              <Label htmlFor="order-phone" className="text-sm mb-2 block">
+                آخر 4 أرقام من رقم الهاتف
+              </Label>
+              <Input
+                id="order-phone"
+                placeholder="1234"
+                value={phoneInput}
+                onChange={(e) => setPhoneInput(e.target.value)}
+                inputMode="numeric"
+                maxLength={4}
+                className="h-12 text-base"
+                dir="ltr"
+              />
+            </div>
           </div>
-          <Button type="submit" className="h-12 px-6 hover-elevate active-elevate-2">
+          <Button
+            type="submit"
+            className="h-12 px-6 w-full md:w-auto hover-elevate active-elevate-2"
+          >
             <Search className="ml-2 h-4 w-4" />
             تتبع
           </Button>
@@ -161,12 +186,12 @@ export default function TrackOrder() {
           </div>
         )}
 
-        {error && submittedCode && !isLoading && (
+        {error && submitted && !isLoading && (
           <div className="text-center py-12 border border-dashed border-border rounded-md">
             <XCircle className="h-10 w-10 text-muted-foreground mx-auto mb-3" />
             <p className="font-medium mb-1">لم يتم العثور على هذا الطلب</p>
             <p className="text-sm text-muted-foreground">
-              تأكد من رقم الطلب وحاول مرة أخرى
+              تأكد من رقم الطلب وآخر 4 أرقام من الهاتف وحاول مرة أخرى
             </p>
           </div>
         )}

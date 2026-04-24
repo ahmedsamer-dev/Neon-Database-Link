@@ -47,14 +47,17 @@ export default function ProductDetail() {
   const isLowStockProduct =
     product && totalProductStock > 0 && totalProductStock <= 5;
 
-  const relatedProducts = useMemo(
-    () =>
-      (allProducts || [])
-        .filter((p) => p.isActive && p.id !== product?.id)
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 4),
-    [allProducts, product?.id],
-  );
+  const relatedProducts = useMemo(() => {
+    const candidates = (allProducts || []).filter(
+      (p) => p.isActive && p.id !== product?.id,
+    );
+    const copy = [...candidates];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy.slice(0, 4);
+  }, [allProducts, product?.id]);
 
   const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);

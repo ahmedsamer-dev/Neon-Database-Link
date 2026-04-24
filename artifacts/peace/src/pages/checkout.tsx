@@ -58,7 +58,10 @@ export default function Checkout() {
       {
         onSuccess: (order) => {
           clearCart();
-          setLocation(`/order-confirmation/${order.id}`);
+          const last4 = (data.phone ?? "").replace(/\D/g, "").slice(-4);
+          setLocation(
+            `/order-confirmation/${order.id}${last4 ? `?phone=${last4}` : ""}`,
+          );
         },
         onError: () => {
           toast.error("حدث خطأ أثناء تقديم الطلب. حاول مجدداً.");

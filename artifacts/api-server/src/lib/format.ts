@@ -57,6 +57,26 @@ export function formatOrder(o: Order, items: OrderItem[]) {
   };
 }
 
+/**
+ * Limited order shape returned to the customer-facing tracking endpoint
+ * after they prove ownership (matching last 4 digits of their phone).
+ * Excludes address, city, and full contact phone to avoid PII leakage.
+ * Keeps customerName + paymentPhone since the requester proved phone
+ * ownership and these are needed for the post-checkout WhatsApp message.
+ */
+export function formatOrderTracking(o: Order, items: OrderItem[]) {
+  return {
+    id: o.code,
+    customerName: o.customerName,
+    paymentPhone: o.paymentPhone,
+    totalAmount: Number(o.totalAmount),
+    paymentStatus: o.paymentStatus as "Pending" | "Paid",
+    orderStatus: o.orderStatus as "Pending" | "Shipped" | "Delivered" | "Cancelled",
+    createdAt: o.createdAt.toISOString(),
+    items: items.map(formatOrderItem),
+  };
+}
+
 export function formatNotification(n: Notification) {
   return {
     id: String(n.id),

@@ -1,4 +1,4 @@
-import { useParams, Link } from "wouter";
+import { useParams, Link, useSearch } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -19,7 +19,6 @@ interface OrderItem {
 interface Order {
   id: string;
   customerName: string;
-  phone: string;
   paymentPhone: string;
   totalAmount: number;
   paymentStatus: string;
@@ -35,16 +34,20 @@ interface StoreSettings {
 
 export default function OrderConfirmation() {
   const { id } = useParams<{ id: string }>();
+  const search = useSearch();
+  const phone = new URLSearchParams(search).get("phone") ?? "";
   const [copied, setCopied] = useState(false);
 
   const { data: order, isLoading: orderLoading } = useQuery<Order>({
-    queryKey: ["order", id],
+    queryKey: ["order", id, phone],
     queryFn: async () => {
-      const res = await fetch(`/api/orders/${id}`);
+      const res = await fetch(
+        `/api/orders/${id}?phone=${encodeURIComponent(phone)}`,
+      );
       if (!res.ok) throw new Error("Order not found");
       return res.json();
     },
-    enabled: !!id,
+    enabled: !!id && !!phone,
     retry: false,
   });
 

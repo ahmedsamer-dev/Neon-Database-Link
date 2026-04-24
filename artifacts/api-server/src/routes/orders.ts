@@ -9,12 +9,28 @@ import {
 } from "@workspace/db";
 import { CreateOrderBody } from "@workspace/api-zod";
 import { eq, count } from "drizzle-orm";
-import { formatOrder } from "../lib/format";
+import { formatOrder, formatOrderTracking } from "../lib/format";
 
 const router: IRouter = Router();
 
+/**
+ * Public order lookup used by the post-checkout confirmation page and
+ * the /track-order page. Requires `?phone=XXXX` (last 4 digits of the
+ * customer's stored phone) as a lightweight ownership proof — without
+ * it (or on mismatch) we return 404 to avoid leaking order existence
+ * or PII (address, city, full phone) via guessable codes like ORD-0001.
+ * The response is intentionally minimal (formatOrderTracking).
+ */
 router.get("/orders/:id", async (req, res) => {
   const idParam = req.params.id;
+  const phoneParam =
+    typeof req.query.phone === "string" ? req.query.phone.replace(/\D/g, "") : "";
+
+  if (phoneParam.length < 4) {
+    res.status(404).json({ error: "Order not found" });
+    return;
+  }
+
   const numeric = Number(idParam);
 
   const [order] = await db
@@ -27,12 +43,20 @@ router.get("/orders/:id", async (req, res) => {
     return;
   }
 
+  const storedDigits = (order.phone ?? "").replace(/\D/g, "");
+  const last4 = storedDigits.slice(-4);
+  const supplied = phoneParam.slice(-4);
+  if (!last4 || last4 !== supplied) {
+    res.status(404).json({ error: "Order not found" });
+    return;
+  }
+
   const items = await db
     .select()
     .from(orderItemsTable)
     .where(eq(orderItemsTable.orderId, order.id));
 
-  res.json(formatOrder(order, items));
+  res.json(formatOrderTracking(order, items));
 });
 
 router.post("/orders", async (req, res) => {
