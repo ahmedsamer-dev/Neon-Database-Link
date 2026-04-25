@@ -2,10 +2,34 @@ import express, { type Express, type Request, type Response, type NextFunction }
 import cors from "cors";
 import compression from "compression";
 import pinoHttp from "pino-http";
+import rateLimit from "express-rate-limit";
 import router from "./routes";
 import { logger } from "./lib/logger";
 
 const app: Express = express();
+
+// General rate limit — 120 requests per minute per IP
+const generalLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 120,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please try again later." },
+  skip: (req) => req.method === "OPTIONS",
+});
+
+// Strict limit for sensitive endpoints (orders, admin login)
+const strictLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests, please slow down." },
+});
+
+app.use("/api", generalLimiter);
+app.use("/api/orders", strictLimiter);
+app.use("/api/admin/login", strictLimiter);
 
 app.use(
   pinoHttp({
