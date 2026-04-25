@@ -50,6 +50,7 @@ export function formatOrder(o: Order, items: OrderItem[]) {
     address: o.address,
     city: o.city,
     totalAmount: Number(o.totalAmount),
+    shippingCost: o.shippingCost != null ? Number(o.shippingCost) : null,
     paymentStatus: o.paymentStatus as "Pending" | "Paid",
     orderStatus: o.orderStatus as "Pending" | "Shipped" | "Delivered" | "Cancelled",
     createdAt: o.createdAt.toISOString(),

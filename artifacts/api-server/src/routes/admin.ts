@@ -176,6 +176,38 @@ router.put("/admin/orders/:id/status", requireAdmin, async (req, res) => {
   res.json(formatOrder(updated, items));
 });
 
+router.patch("/admin/orders/:id/shipping", requireAdmin, async (req, res) => {
+  const shippingCost = Number(req.body?.shippingCost);
+  if (isNaN(shippingCost) || shippingCost < 0) {
+    res.status(400).json({ error: "Invalid shippingCost" });
+    return;
+  }
+  const order = await findOrderByIdOrCode(req.params.id);
+  if (!order) {
+    res.status(404).json({ error: "Not found" });
+    return;
+  }
+  const items = await db
+    .select()
+    .from(orderItemsTable)
+    .where(eq(orderItemsTable.orderId, order.id));
+
+  const itemsTotal = items.reduce((s, i) => s + Number(i.price) * i.quantity, 0);
+  const newTotal = (itemsTotal + shippingCost).toFixed(2);
+
+  const [updated] = await db
+    .update(ordersTable)
+    .set({ shippingCost: shippingCost.toFixed(2), totalAmount: newTotal })
+    .where(eq(ordersTable.id, order.id))
+    .returning();
+
+  if (!updated) {
+    res.status(500).json({ error: "Update failed" });
+    return;
+  }
+  res.json(formatOrder(updated, items));
+});
+
 router.get("/admin/stats", requireAdmin, async (_req, res) => {
   const [statsRow] = await db
     .select({

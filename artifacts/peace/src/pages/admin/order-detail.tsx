@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { useParams, Link } from "wouter";
 import { useAuth } from "@/lib/auth";
 import {
@@ -11,6 +12,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -18,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ArrowRight, MapPin, Phone, CreditCard } from "lucide-react";
+import { ArrowRight, MapPin, Phone, CreditCard, Truck } from "lucide-react";
 import { format } from "date-fns";
 import { arEG } from "date-fns/locale";
 import { useQueryClient } from "@tanstack/react-query";
@@ -35,6 +37,15 @@ export default function AdminOrderDetail() {
   });
   const confirmPayment = useConfirmPayment();
   const updateStatus = useUpdateOrderStatus();
+
+  const [shippingInput, setShippingInput] = useState("");
+  const [savingShipping, setSavingShipping] = useState(false);
+
+  useEffect(() => {
+    if (order?.shippingCost != null) {
+      setShippingInput(String(order.shippingCost));
+    }
+  }, [order?.shippingCost]);
 
   const handleConfirmPayment = () => {
     if (!token || !id) return;
@@ -66,6 +77,31 @@ export default function AdminOrderDetail() {
     );
   };
 
+  const handleSaveShipping = async () => {
+    if (!token || !id) return;
+    const val = Number(shippingInput);
+    if (isNaN(val) || val < 0) {
+      toast.error("أدخل قيمة صحيحة لسعر الشحن");
+      return;
+    }
+    setSavingShipping(true);
+    try {
+      const res = await fetch(`/api/admin/orders/${id}/shipping`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ shippingCost: val, token }),
+      });
+      if (!res.ok) throw new Error();
+      toast.success("تم حفظ سعر الشحن");
+      queryClient.invalidateQueries({ queryKey: getGetOrderQueryKey(id, { token }) });
+      queryClient.invalidateQueries({ queryKey: getListOrdersQueryKey({ token }) });
+    } catch {
+      toast.error("فشل حفظ سعر الشحن");
+    } finally {
+      setSavingShipping(false);
+    }
+  };
+
   if (isLoading)
     return (
       <div className="p-8 text-muted-foreground text-center" dir="rtl">
@@ -78,6 +114,9 @@ export default function AdminOrderDetail() {
         الطلب غير موجود
       </div>
     );
+
+  const itemsSubtotal = order.items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const shipping = order.shippingCost ?? 0;
 
   return (
     <div className="space-y-6 max-w-5xl" dir="rtl">
@@ -123,9 +162,21 @@ export default function AdminOrderDetail() {
                 ))}
               </div>
               <Separator className="my-6" />
-              <div className="flex justify-between items-center font-bold text-lg">
-                <span>الإجمالي</span>
-                <span>{order.totalAmount.toFixed(2)} ج.م</span>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                  <span>المجموع الفرعي</span>
+                  <span>{itemsSubtotal.toFixed(2)} ج.م</span>
+                </div>
+                {shipping > 0 && (
+                  <div className="flex justify-between items-center text-sm text-muted-foreground">
+                    <span>الشحن</span>
+                    <span>{shipping.toFixed(2)} ج.م</span>
+                  </div>
+                )}
+                <div className="flex justify-between items-center font-bold text-lg pt-2 border-t border-border">
+                  <span>الإجمالي</span>
+                  <span>{order.totalAmount.toFixed(2)} ج.م</span>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -176,6 +227,35 @@ export default function AdminOrderDetail() {
                     <SelectItem value="Cancelled">ملغي</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+
+              <Separator />
+
+              <div className="space-y-2">
+                <div className="flex items-center gap-1.5 mb-1">
+                  <Truck className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">سعر الشحن (ج.م)</span>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="0.00"
+                    value={shippingInput}
+                    onChange={(e) => setShippingInput(e.target.value)}
+                    className="text-left"
+                    dir="ltr"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={handleSaveShipping}
+                    disabled={savingShipping}
+                    className="shrink-0"
+                  >
+                    {savingShipping ? "..." : "حفظ"}
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>
