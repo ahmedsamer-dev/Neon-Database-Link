@@ -14,7 +14,7 @@ import { motion } from "framer-motion";
 import { WishlistButton } from "@/components/wishlist-button";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
 import { useMemo, useState } from "react";
-import { Search, X, SlidersHorizontal, Truck, RefreshCw, ShieldCheck, Headphones } from "lucide-react";
+import { Search, X, SlidersHorizontal } from "lucide-react";
 
 const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 
@@ -188,26 +188,6 @@ export default function Home() {
               <span aria-hidden>←</span>
             </a>
           </motion.div>
-        </div>
-      </section>
-
-      {/* Trust Strip */}
-      <section className="border-y bg-secondary/40">
-        <div className="container mx-auto px-4 md:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-x-reverse divide-border">
-            {[
-              { icon: Truck,        ar: "توصيل سريع",      sub: "لكل محافظات مصر" },
-              { icon: RefreshCw,    ar: "إرجاع مجاني",     sub: "خلال ١٤ يوم" },
-              { icon: ShieldCheck,  ar: "ضمان الجودة",     sub: "قطن ١٠٠٪ طبيعي" },
-              { icon: Headphones,   ar: "دعم مستمر",       sub: "تواصل معنا دايمًا" },
-            ].map(({ icon: Icon, ar, sub }, i) => (
-              <div key={i} className="flex flex-col items-center text-center gap-1.5 py-5 px-4">
-                <Icon className="h-5 w-5 text-foreground/60 mb-1" />
-                <span className="text-sm font-semibold">{ar}</span>
-                <span className="text-xs text-muted-foreground">{sub}</span>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
