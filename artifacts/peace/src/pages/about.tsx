@@ -75,15 +75,6 @@ export default function About() {
         <div className="absolute inset-0 bg-gradient-to-t from-neutral-950/90 via-neutral-900/30 to-transparent" />
 
         <div className="relative z-10 w-full px-6 md:px-16 pb-16 max-w-6xl mx-auto">
-          <motion.span
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="block text-xs uppercase tracking-[0.35em] text-white/50 mb-5 font-medium"
-          >
-            Clothing Brand · Egypt · Est. 2024
-          </motion.span>
-
           <motion.h1
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
@@ -98,10 +89,9 @@ export default function About() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.25 }}
-            className="mt-4 text-white/70 text-lg md:text-2xl font-light max-w-xl leading-snug"
+            className="mt-5 text-white/80 text-xl md:text-2xl font-light max-w-lg leading-relaxed"
           >
-            ملابس بُنيت على صمت الداخل.<br />
-            <span className="text-white/40 text-base">Wear the calm.</span>
+            ارتدِ هدوءك الداخلي
           </motion.p>
 
           <motion.div
