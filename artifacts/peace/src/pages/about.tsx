@@ -60,6 +60,24 @@ const reasons = [
   },
 ];
 
+const philosophy = [
+  {
+    icon: "🌿",
+    title: "خامات فاخرة",
+    desc: "كل قطعة مصنوعة من قطن طبيعي عالي الجودة — ناعم على بشرتك، ومتين مع كل غسلة.",
+  },
+  {
+    icon: "🕊️",
+    title: "راحة حقيقية",
+    desc: "صممنا كل تفصيلة عشان تحس بالراحة طول اليوم — من الصبح لآخر الليل.",
+  },
+  {
+    icon: "🖤",
+    title: "فلسفة minimal",
+    desc: "لا زيادة، لا نقصان. تصاميم هادئة تتكلم عنك من غير ضجة.",
+  },
+];
+
 export default function About() {
   return (
     <div className="flex flex-col w-full" dir="rtl">
@@ -134,21 +152,43 @@ export default function About() {
         </motion.div>
       </section>
 
-      {/* ═══ من نحن ═══ */}
+      {/* ═══ BRAND STORY — من نحن ═══ */}
       <section className="py-24 container mx-auto px-4 md:px-16 max-w-5xl">
         <div className="grid md:grid-cols-2 gap-16 items-center">
           <motion.div {...fadeUp} className="order-2 md:order-1">
             <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-4 block">Our Story</span>
             <h2 className="text-4xl font-serif font-bold mb-6 tracking-tight leading-tight">من نحن</h2>
+
+            <p className="text-foreground/90 leading-relaxed text-base mb-4 font-medium">
+              Peace بدأت بفكرة بسيطة جداً:
+              <br />
+              إزاي تعمل لبس يحسسك بالهدوء في وسط دنيا صاخبة؟
+            </p>
+
             <p className="text-muted-foreground leading-relaxed text-base mb-4">
-              Peace. ليست مجرد علامة تجارية للملابس — إنها فلسفة حياة. أُسِّست بإيمان راسخ بأن ما
-              ترتديه يعكس من أنت من الداخل. نؤمن بأن الهدوء والتوازن يمكن أن يُعبَّر عنهما من خلال
-              كل قطعة تلبسها.
+              مش كنا عايزين brand عادي. كنا عايزين كل قطعة تحكي — بشكلها الهادئ،
+              بقماشها الناعم، بتصميمها اللي مش بيلفت الأنظار بالضوضاء، بل بالأناقة الحقيقية.
             </p>
+
             <p className="text-muted-foreground leading-relaxed text-base">
-              بدأنا برؤية بسيطة: تصميم ملابس تجمع بين الراحة والأناقة، قطع يمكنك ارتداؤها يومياً
-              دون أن تفقد طابعك الشخصي. كل خيط، كل قصة، كل تفصيلة — مصممة بعناية لك.
+              Peace مش مجرد علامة على هدومك. هي طريقة تفكير.
+              لما تلبسها، بتقول للعالم إنك واثق، هادئ، وعارف مين أنت.
             </p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="mt-8"
+            >
+              <Link
+                href="/"
+                className="inline-flex items-center gap-2 text-sm font-semibold border-b border-foreground/30 pb-0.5 hover:border-foreground transition-colors duration-200"
+              >
+                تصفح المجموعة ←
+              </Link>
+            </motion.div>
           </motion.div>
 
           <motion.div
@@ -161,9 +201,36 @@ export default function About() {
             <img
               src="/about.jpg"
               alt="Peace brand story"
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover hover:scale-105 transition-transform duration-700"
             />
           </motion.div>
+        </div>
+      </section>
+
+      {/* ═══ PHILOSOPHY / TRUST — فلسفتنا ═══ */}
+      <section className="py-20 bg-foreground text-background">
+        <div className="container mx-auto px-4 md:px-16 max-w-5xl">
+          <motion.div {...fadeUp} className="text-center mb-14">
+            <span className="text-xs uppercase tracking-[0.3em] text-background/40 mb-3 block">Our Philosophy</span>
+            <h2 className="text-3xl font-serif font-bold tracking-tight">فلسفتنا</h2>
+          </motion.div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {philosophy.map((item, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.55, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
+                className="text-center px-4"
+              >
+                <div className="text-4xl mb-4">{item.icon}</div>
+                <h3 className="font-semibold text-lg mb-3 text-background">{item.title}</h3>
+                <p className="text-background/60 text-sm leading-relaxed">{item.desc}</p>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -256,16 +323,16 @@ export default function About() {
               🕊️
             </motion.div>
             <span className="text-xs uppercase tracking-[0.3em] text-background/40 mb-4 block">Ready?</span>
-            <h2 className="text-4xl font-serif font-bold mb-4 leading-tight">ابدأ رحلتك مع Peace.</h2>
+            <h2 className="text-4xl font-serif font-bold mb-4 leading-tight">جاهز تبدأ رحلتك مع Peace؟</h2>
             <p className="text-background/60 mb-10 leading-relaxed text-lg">
-              استكشف مجموعتنا المختارة بعناية<br />واختر ما يعكس هويتك الحقيقية
+              استكشف مجموعتنا دلوقتي واختار القطعة اللي بتحسسك بيك
             </p>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
               <Button
                 asChild
                 size="lg"
                 variant="outline"
-                className="bg-transparent border-background/40 text-background hover:bg-background hover:text-foreground transition-all duration-300 px-12 rounded-sm"
+                className="bg-transparent border-background/40 text-background hover:bg-background hover:text-foreground transition-all duration-300 px-12 rounded-sm text-base"
               >
                 <Link href="/">تسوق الآن ←</Link>
               </Button>
