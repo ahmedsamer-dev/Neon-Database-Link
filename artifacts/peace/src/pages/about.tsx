@@ -91,7 +91,7 @@ export default function About() {
             transition={{ duration: 0.8, delay: 0.25 }}
             className="mt-5 text-white/80 text-xl md:text-2xl font-light max-w-lg leading-relaxed"
           >
-            ارتدِ هدوءك الداخلي
+            مش بس لبس.. ده إحساس 🕊️
           </motion.p>
 
           <motion.div
