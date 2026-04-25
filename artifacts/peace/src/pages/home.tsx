@@ -14,7 +14,7 @@ import { motion } from "framer-motion";
 import { WishlistButton } from "@/components/wishlist-button";
 import { getRecentlyViewed } from "@/lib/recently-viewed";
 import { useMemo, useState } from "react";
-import { Search, X, SlidersHorizontal } from "lucide-react";
+import { Search, X, SlidersHorizontal, Truck, RefreshCw, ShieldCheck, Headphones } from "lucide-react";
 
 const SIZE_ORDER = ["XS", "S", "M", "L", "XL", "XXL", "XXXL"];
 
@@ -188,6 +188,26 @@ export default function Home() {
               <span aria-hidden>←</span>
             </a>
           </motion.div>
+        </div>
+      </section>
+
+      {/* Trust Strip */}
+      <section className="border-y bg-secondary/40">
+        <div className="container mx-auto px-4 md:px-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 divide-x divide-x-reverse divide-border">
+            {[
+              { icon: Truck,        ar: "توصيل سريع",      sub: "لكل محافظات مصر" },
+              { icon: RefreshCw,    ar: "إرجاع مجاني",     sub: "خلال ١٤ يوم" },
+              { icon: ShieldCheck,  ar: "ضمان الجودة",     sub: "قطن ١٠٠٪ طبيعي" },
+              { icon: Headphones,   ar: "دعم مستمر",       sub: "تواصل معنا دايمًا" },
+            ].map(({ icon: Icon, ar, sub }, i) => (
+              <div key={i} className="flex flex-col items-center text-center gap-1.5 py-5 px-4">
+                <Icon className="h-5 w-5 text-foreground/60 mb-1" />
+                <span className="text-sm font-semibold">{ar}</span>
+                <span className="text-xs text-muted-foreground">{sub}</span>
+              </div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -404,40 +424,63 @@ export default function Home() {
             {filteredProducts.map((product, index) => {
                 const totalStock = product.variants.reduce((sum, v) => sum + v.stock, 0);
                 const isOutOfStock = totalStock === 0;
-
                 const isLowStock = !isOutOfStock && totalStock > 0 && totalStock <= 5;
+                const isNew = index < 3;
+
+                const uniqueColors = Array.from(
+                  new Set(product.variants.map((v) => v.color).filter(Boolean))
+                ).slice(0, 5);
 
                 return (
                   <motion.div
                     key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
+                    initial={{ opacity: 0, y: 24 }}
                     whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.5, delay: index * 0.08 }}
+                    viewport={{ once: true, margin: "-80px" }}
+                    transition={{ duration: 0.5, delay: index * 0.07 }}
                     className="group flex flex-col card-premium relative"
                   >
                     <WishlistButton productId={product.id} productName={product.name} />
+
+                    {/* badges */}
+                    <div className="absolute top-3 right-3 z-10 flex flex-col gap-1.5">
+                      {isNew && !isOutOfStock && (
+                        <span className="bg-foreground text-background text-[10px] font-bold px-2.5 py-0.5 rounded-full tracking-widest uppercase shadow">
+                          جديد
+                        </span>
+                      )}
+                      {isLowStock && (
+                        <span className="bg-rose-500 text-white text-[10px] font-semibold px-2.5 py-0.5 rounded-full tracking-wide uppercase shadow">
+                          آخر {totalStock} قطع
+                        </span>
+                      )}
+                    </div>
+
                     <Link
                       href={`/products/${product.id}`}
-                      className="block aspect-[3/4] relative overflow-hidden bg-muted rounded-sm mb-4"
+                      className="block aspect-[3/4] relative overflow-hidden bg-muted rounded-sm mb-3"
                     >
                       {product.images && product.images.length > 0 ? (
                         <img
                           src={product.images[0]}
                           alt={product.name}
-                          className="w-full h-full object-cover image-premium"
+                          className="w-full h-full object-cover image-premium group-hover:scale-105 transition-transform duration-700"
                         />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-secondary text-secondary-foreground font-serif text-2xl">
-                          Peace.
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-secondary text-secondary-foreground gap-2">
+                          <img src="/logo.png" alt="peace" className="h-12 w-12 opacity-20" />
+                          <span className="font-serif text-xl opacity-30">PEACE.</span>
                         </div>
                       )}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                      {isLowStock && (
-                        <span className="absolute top-3 right-3 bg-rose-500 text-white text-[10px] font-semibold px-2.5 py-1 rounded-full tracking-wide uppercase shadow">
-                          آخر {totalStock} قطع
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                      {/* hover CTA */}
+                      <div className="absolute bottom-4 inset-x-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                        <span className="block w-full text-center bg-white/95 text-black text-xs font-semibold py-2.5 rounded-sm tracking-wide shadow-lg">
+                          اختر مقاسك ←
                         </span>
-                      )}
+                      </div>
+
                       {isOutOfStock && (
                         <div className="absolute inset-0 bg-black/50 flex items-center justify-center backdrop-blur-[1px]">
                           <span className="bg-white text-black text-xs font-semibold px-4 py-2 rounded-full tracking-wide uppercase">
@@ -446,22 +489,37 @@ export default function Home() {
                         </div>
                       )}
                     </Link>
+
+                    {/* color dots */}
+                    {uniqueColors.length > 0 && (
+                      <div className="flex items-center gap-1.5 px-1 mb-2">
+                        {uniqueColors.map((color) => (
+                          <span
+                            key={color}
+                            title={color}
+                            className="w-3.5 h-3.5 rounded-full border border-border/60 flex-shrink-0"
+                            style={{ backgroundColor: /^#|^rgb|^[a-zA-Z]+$/.test(color) ? color : undefined, background: !/^#|^rgb|^[a-zA-Z]+$/.test(color) ? "#ccc" : undefined }}
+                          />
+                        ))}
+                        {product.variants.map(v => v.color).filter(Boolean).length > 5 && (
+                          <span className="text-[10px] text-muted-foreground">+{product.variants.map(v => v.color).filter(Boolean).length - 5}</span>
+                        )}
+                      </div>
+                    )}
+
                     <div className="flex justify-between items-start gap-3 px-1">
                       <div className="flex-1 min-w-0">
                         <h3 className="font-medium text-base tracking-tight">
-                          <Link
-                            href={`/products/${product.id}`}
-                            className="link-premium inline-block"
-                          >
+                          <Link href={`/products/${product.id}`} className="link-premium inline-block">
                             {product.name}
                           </Link>
                         </h3>
-                        <p className="text-sm text-muted-foreground mt-1 line-clamp-1">
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">
                           {product.description}
                         </p>
                       </div>
-                      <span className="font-medium tracking-tight whitespace-nowrap">
-                        {product.basePrice.toFixed(2)} ج.م
+                      <span className="font-semibold tracking-tight whitespace-nowrap text-sm">
+                        {product.basePrice.toFixed(0)} ج.م
                       </span>
                     </div>
                   </motion.div>
