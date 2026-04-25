@@ -9,7 +9,7 @@ import {
   storeSettingsTable,
 } from "@workspace/db";
 import { CreateOrderBody } from "@workspace/api-zod";
-import { eq, count } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { formatOrder, formatOrderTracking } from "../lib/format";
 
 const router: IRouter = Router();
@@ -126,41 +126,55 @@ router.post("/orders", async (req, res) => {
   }
   const grandTotal = total + shippingCost;
 
-  // Generate order code
-  const [{ value: orderCount }] = await db
-    .select({ value: count() })
-    .from(ordersTable);
-  const code = `ORD-${String((orderCount ?? 0) + 1).padStart(4, "0")}`;
+  // Create order + items + notification atomically. The order code is derived
+  // from the row's auto-generated id (not from count(*)), so deletions of
+  // older/cancelled orders can never produce a duplicate code.
+  const { order, insertedItems, code } = await db.transaction(async (tx) => {
+    const placeholderCode = `TMP-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 
-  const [order] = await db
-    .insert(ordersTable)
-    .values({
-      code,
-      customerName: input.customerName,
-      phone: input.phone,
-      paymentPhone: input.paymentPhone,
-      address: input.address,
-      city: input.city,
-      totalAmount: grandTotal.toFixed(2),
-      shippingCost: shippingCost > 0 ? shippingCost.toFixed(2) : null,
-      paymentStatus: "Pending",
-      orderStatus: "Pending",
-    })
-    .returning();
+    const [inserted] = await tx
+      .insert(ordersTable)
+      .values({
+        code: placeholderCode,
+        customerName: input.customerName,
+        phone: input.phone,
+        paymentPhone: input.paymentPhone,
+        address: input.address,
+        city: input.city,
+        totalAmount: grandTotal.toFixed(2),
+        shippingCost: shippingCost > 0 ? shippingCost.toFixed(2) : null,
+        paymentStatus: "Pending",
+        orderStatus: "Pending",
+      })
+      .returning();
 
-  if (!order) {
-    res.status(500).json({ error: "Failed to create order" });
-    return;
-  }
+    if (!inserted) {
+      throw new Error("Failed to create order");
+    }
 
-  const insertedItems = await db
-    .insert(orderItemsTable)
-    .values(itemsToInsert.map((i) => ({ ...i, orderId: order.id })))
-    .returning();
+    const finalCode = `ORD-${String(inserted.id).padStart(4, "0")}`;
 
-  await db.insert(notificationsTable).values({
-    type: "NewOrder",
-    message: `طلب جديد ${code} من ${input.customerName} — ${grandTotal.toFixed(2)} ج.م`,
+    const [updated] = await tx
+      .update(ordersTable)
+      .set({ code: finalCode })
+      .where(eq(ordersTable.id, inserted.id))
+      .returning();
+
+    if (!updated) {
+      throw new Error("Failed to finalize order code");
+    }
+
+    const items = await tx
+      .insert(orderItemsTable)
+      .values(itemsToInsert.map((i) => ({ ...i, orderId: updated.id })))
+      .returning();
+
+    await tx.insert(notificationsTable).values({
+      type: "NewOrder",
+      message: `طلب جديد ${finalCode} من ${input.customerName} — ${grandTotal.toFixed(2)} ج.م`,
+    });
+
+    return { order: updated, insertedItems: items, code: finalCode };
   });
 
   req.log.info({ orderId: order.id, code }, "Order created");

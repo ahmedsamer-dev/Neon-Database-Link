@@ -78,8 +78,12 @@ app.use((_, res, next) => {
 app.use("/api", router);
 
 app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
-  const message = err instanceof Error ? err.message : "Internal server error";
-  logger.error({ err }, message);
+  const baseMessage =
+    err instanceof Error ? err.message : "Internal server error";
+  const cause =
+    err instanceof Error && err.cause instanceof Error ? err.cause : null;
+  const message = cause ? `${baseMessage} — cause: ${cause.message}` : baseMessage;
+  logger.error({ err, cause }, message);
   res.status(500).json({ error: message });
 });
 
