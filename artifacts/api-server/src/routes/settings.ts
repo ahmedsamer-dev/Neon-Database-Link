@@ -9,6 +9,7 @@ const DEFAULTS: Record<string, string> = {
   payment_phone: "01000000000",
   whatsapp_phone: "201000000000",
   store_name: "PEACE.",
+  shipping_cost: "0",
 };
 
 async function getSetting(key: string): Promise<string> {
@@ -38,13 +39,14 @@ async function upsertSetting(key: string, value: string): Promise<void> {
     });
 }
 
-// Public endpoint - order confirmation uses this
+// Public endpoint - order confirmation and checkout use this
 router.get("/settings", async (_req, res) => {
   const settings = await getAllSettings();
   res.json({
     paymentPhone: settings.payment_phone,
     whatsappPhone: settings.whatsapp_phone,
     storeName: settings.store_name,
+    shippingCost: Number(settings.shipping_cost ?? 0),
   });
 });
 
@@ -56,11 +58,15 @@ router.get("/admin/settings", requireAdmin, async (_req, res) => {
 
 // Admin update settings
 router.put("/admin/settings", requireAdmin, async (req, res) => {
-  const { payment_phone, whatsapp_phone, store_name } = req.body;
+  const { payment_phone, whatsapp_phone, store_name, shipping_cost } = req.body;
 
   if (payment_phone !== undefined) await upsertSetting("payment_phone", String(payment_phone));
   if (whatsapp_phone !== undefined) await upsertSetting("whatsapp_phone", String(whatsapp_phone));
   if (store_name !== undefined) await upsertSetting("store_name", String(store_name));
+  if (shipping_cost !== undefined) {
+    const val = Number(shipping_cost);
+    if (!isNaN(val) && val >= 0) await upsertSetting("shipping_cost", val.toFixed(2));
+  }
 
   const updated = await getAllSettings();
   res.json(updated);

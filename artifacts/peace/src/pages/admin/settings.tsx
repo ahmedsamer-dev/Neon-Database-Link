@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Loader2, Save, Phone, MessageCircle } from "lucide-react";
+import { Loader2, Save, Phone, MessageCircle, Truck } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 
@@ -12,6 +12,7 @@ interface StoreSettings {
   payment_phone: string;
   whatsapp_phone: string;
   store_name: string;
+  shipping_cost: string;
 }
 
 export default function AdminSettings() {
@@ -21,6 +22,7 @@ export default function AdminSettings() {
   const [paymentPhone, setPaymentPhone] = useState("");
   const [whatsappPhone, setWhatsappPhone] = useState("");
   const [storeName, setStoreName] = useState("");
+  const [shippingCost, setShippingCost] = useState("");
 
   const { data: settings, isLoading } = useQuery<StoreSettings>({
     queryKey: ["admin-settings", token],
@@ -37,6 +39,7 @@ export default function AdminSettings() {
       setPaymentPhone(settings.payment_phone || "");
       setWhatsappPhone(settings.whatsapp_phone || "");
       setStoreName(settings.store_name || "");
+      setShippingCost(settings.shipping_cost || "0");
     }
   }, [settings]);
 
@@ -49,6 +52,7 @@ export default function AdminSettings() {
           payment_phone: paymentPhone,
           whatsapp_phone: whatsappPhone,
           store_name: storeName,
+          shipping_cost: shippingCost,
         }),
       });
       if (!res.ok) throw new Error("Failed to save settings");
@@ -141,6 +145,34 @@ export default function AdminSettings() {
                   placeholder="PEACE."
                   value={storeName}
                   onChange={(e) => setStoreName(e.target.value)}
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Shipping Cost */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-lg">
+                <Truck className="h-5 w-5" />
+                سعر الشحن
+              </CardTitle>
+              <CardDescription>
+                هيتضاف تلقائياً على كل أوردر جديد وقت إتمام الطلب. اكتب 0 لو الشحن مجاني.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <Label htmlFor="shipping_cost">سعر الشحن (ج.م)</Label>
+                <Input
+                  id="shipping_cost"
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  placeholder="0.00"
+                  value={shippingCost}
+                  onChange={(e) => setShippingCost(e.target.value)}
+                  dir="ltr"
                 />
               </div>
             </CardContent>

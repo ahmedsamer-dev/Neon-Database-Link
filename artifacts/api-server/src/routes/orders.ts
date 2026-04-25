@@ -6,6 +6,7 @@ import {
   variantsTable,
   productsTable,
   notificationsTable,
+  storeSettingsTable,
 } from "@workspace/db";
 import { CreateOrderBody } from "@workspace/api-zod";
 import { eq, count } from "drizzle-orm";
@@ -112,6 +113,14 @@ router.post("/orders", async (req, res) => {
     });
   }
 
+  // Fetch shipping cost from store settings
+  const [shippingRow] = await db
+    .select()
+    .from(storeSettingsTable)
+    .where(eq(storeSettingsTable.key, "shipping_cost"));
+  const shippingCost = Number(shippingRow?.value ?? 0);
+  const grandTotal = total + shippingCost;
+
   // Generate order code
   const [{ value: orderCount }] = await db
     .select({ value: count() })
@@ -127,7 +136,8 @@ router.post("/orders", async (req, res) => {
       paymentPhone: input.paymentPhone,
       address: input.address,
       city: input.city,
-      totalAmount: total.toFixed(2),
+      totalAmount: grandTotal.toFixed(2),
+      shippingCost: shippingCost > 0 ? shippingCost.toFixed(2) : null,
       paymentStatus: "Pending",
       orderStatus: "Pending",
     })
@@ -145,7 +155,7 @@ router.post("/orders", async (req, res) => {
 
   await db.insert(notificationsTable).values({
     type: "NewOrder",
-    message: `طلب جديد ${code} من ${input.customerName} — ${total.toFixed(2)} ج.م`,
+    message: `طلب جديد ${code} من ${input.customerName} — ${grandTotal.toFixed(2)} ج.م`,
   });
 
   req.log.info({ orderId: order.id, code }, "Order created");

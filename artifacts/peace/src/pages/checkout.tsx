@@ -1,10 +1,10 @@
-import { useState } from "react";
 import { useLocation } from "wouter";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { useCart } from "@/lib/cart";
 import { useCreateOrder } from "@workspace/api-client-react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -27,6 +27,17 @@ export default function Checkout() {
   const [, setLocation] = useLocation();
   const { items, cartTotal, clearCart } = useCart();
   const createOrder = useCreateOrder();
+
+  const { data: storeSettings } = useQuery<{ shippingCost: number }>({
+    queryKey: ["public-settings"],
+    queryFn: async () => {
+      const res = await fetch("/api/settings");
+      if (!res.ok) throw new Error("Failed to load settings");
+      return res.json();
+    },
+  });
+  const shippingCost = storeSettings?.shippingCost ?? 0;
+  const grandTotal = cartTotal + shippingCost;
 
   const form = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
@@ -249,7 +260,11 @@ export default function Checkout() {
               </div>
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">الشحن</span>
-                <span className="text-emerald-600 font-medium">مجاني</span>
+                {shippingCost > 0 ? (
+                  <span>{shippingCost.toFixed(2)} ج.م</span>
+                ) : (
+                  <span className="text-emerald-600 font-medium">مجاني</span>
+                )}
               </div>
             </div>
 
@@ -257,7 +272,7 @@ export default function Checkout() {
 
             <div className="flex justify-between font-bold text-lg">
               <span>الإجمالي</span>
-              <span>{cartTotal.toFixed(2)} ج.م</span>
+              <span>{grandTotal.toFixed(2)} ج.م</span>
             </div>
           </div>
         </div>
