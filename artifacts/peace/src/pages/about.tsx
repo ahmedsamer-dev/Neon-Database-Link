@@ -81,25 +81,44 @@ export default function About() {
         </div>
       </section>
 
-      {/* THREE VALUES */}
-      <section className="border-t py-16 bg-secondary/30">
+      {/* لماذا نحن الأفضل */}
+      <section className="py-24 bg-foreground text-background">
         <div className="container mx-auto px-6 md:px-16 max-w-4xl">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="text-center mb-14"
+          >
+            <span className="text-xs uppercase tracking-[0.3em] text-background/40 mb-3 block">Why Us</span>
+            <h2 className="text-3xl font-serif font-bold mb-4 tracking-tight">لماذا نحن الأفضل</h2>
+            <p className="text-background/60 max-w-xl mx-auto">
+              ليس مجرد كلام — بل التزام راسخ بكل خطوة من رحلتك معنا
+            </p>
+          </motion.div>
+
+          <div className="grid md:grid-cols-2 gap-6">
             {[
-              { icon: "🌿", title: "خامات فاخرة", desc: "قطن طبيعي ١٠٠٪ ناعم ومتين" },
-              { icon: "🕊️", title: "راحة حقيقية", desc: "مريحة من الصبح لآخر الليل" },
-              { icon: "🖤", title: "تصميم minimal", desc: "هادئ وأنيق بدون زيادة" },
-            ].map((v, i) => (
+              { icon: "✨", title: "جودة لا تُساوم", desc: "نختار أقمشتنا بعناية شديدة لضمان الراحة والمتانة معاً. قطعك من Peace تصحبك لسنوات." },
+              { icon: "🎨", title: "تصاميم خالدة", desc: "بعيداً عن صخب الموضة السريعة، نصنع قطعاً تتجاوز الموسم. ترتديها اليوم وتحبها بعد خمس سنوات." },
+              { icon: "💎", title: "سعر عادل حقيقي", desc: "نؤمن أن الجودة الحقيقية يجب أن تكون في متناول الجميع. أسعارنا صادقة تعكس القيمة الفعلية." },
+              { icon: "🤝", title: "خدمة تشعرك باهتمام", desc: "من لحظة طلبك حتى وصوله إليك، فريقنا موجود لك. راحتك أولويتنا الأولى والأخيرة." },
+            ].map((item, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
+                initial={{ opacity: 0, x: i % 2 === 0 ? 30 : -30 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
+                className="flex gap-5 p-6 border border-background/10 rounded-sm hover:bg-background/5 transition-colors duration-200 cursor-default"
               >
-                <div className="text-4xl mb-3">{v.icon}</div>
-                <h3 className="font-semibold mb-1">{v.title}</h3>
-                <p className="text-muted-foreground text-sm">{v.desc}</p>
+                <div className="flex-shrink-0 text-3xl leading-none mt-1">{item.icon}</div>
+                <div>
+                  <h3 className="font-semibold mb-2 text-background">{item.title}</h3>
+                  <p className="text-background/60 text-sm leading-relaxed">{item.desc}</p>
+                </div>
               </motion.div>
             ))}
           </div>
