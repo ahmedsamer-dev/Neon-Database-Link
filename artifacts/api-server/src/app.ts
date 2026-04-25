@@ -8,6 +8,8 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+app.set("trust proxy", 1);
+
 // General rate limit — 120 requests per minute per IP
 const generalLimiter = rateLimit({
   windowMs: 60 * 1000,
