@@ -30,7 +30,6 @@ const strictLimiter = rateLimit({
 });
 
 app.use("/api", generalLimiter);
-app.use("/api/orders", strictLimiter);
 app.use("/api/admin/login", strictLimiter);
 
 app.use(
