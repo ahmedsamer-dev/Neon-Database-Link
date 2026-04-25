@@ -9,12 +9,12 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const SIZE_DATA: Array<{ size: string; chest: string; waist: string; length: string }> = [
-  { size: "S", chest: "92 - 96", waist: "76 - 80", length: "68" },
-  { size: "M", chest: "96 - 100", waist: "80 - 84", length: "70" },
-  { size: "L", chest: "100 - 106", waist: "84 - 90", length: "72" },
-  { size: "XL", chest: "106 - 112", waist: "90 - 96", length: "74" },
-  { size: "XXL", chest: "112 - 118", waist: "96 - 102", length: "76" },
+const SIZE_DATA: Array<{ size: string; weight: string; height: string }> = [
+  { size: "S",   weight: "55 – 65",  height: "155 – 165" },
+  { size: "M",   weight: "65 – 75",  height: "165 – 173" },
+  { size: "L",   weight: "75 – 90",  height: "170 – 178" },
+  { size: "XL",  weight: "90 – 105", height: "175 – 183" },
+  { size: "XXL", weight: "105 – 120",height: "180 – 190" },
 ];
 
 export function SizeGuide() {
@@ -31,12 +31,11 @@ export function SizeGuide() {
           دليل المقاسات
         </button>
       </DialogTrigger>
-      <DialogContent dir="rtl" className="max-w-lg">
+      <DialogContent dir="rtl" className="max-w-md">
         <DialogHeader>
           <DialogTitle className="font-serif text-xl">دليل المقاسات</DialogTitle>
           <DialogDescription>
-            جميع القياسات بالسنتيمتر. للحصول على أفضل مقاس، قس صدرك ووسطك مع
-            إبقاء شريط القياس مرناً وغير مشدود.
+            اختار مقاسك حسب وزنك وطولك بالكيلو والسنتيمتر.
           </DialogDescription>
         </DialogHeader>
 
@@ -44,27 +43,23 @@ export function SizeGuide() {
           <table className="w-full text-sm border-collapse">
             <thead>
               <tr className="border-b border-border">
-                <th className="text-right py-3 px-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                <th className="text-right py-3 px-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
                   المقاس
                 </th>
-                <th className="text-right py-3 px-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  الصدر
+                <th className="text-right py-3 px-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                  الوزن (كجم)
                 </th>
-                <th className="text-right py-3 px-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  الخصر
-                </th>
-                <th className="text-right py-3 px-2 font-medium text-muted-foreground text-xs uppercase tracking-wider">
-                  الطول
+                <th className="text-right py-3 px-3 font-medium text-muted-foreground text-xs uppercase tracking-wider">
+                  الطول (سم)
                 </th>
               </tr>
             </thead>
             <tbody>
               {SIZE_DATA.map((row) => (
-                <tr key={row.size} className="border-b border-border last:border-0">
-                  <td className="py-3 px-2 font-medium">{row.size}</td>
-                  <td className="py-3 px-2 text-muted-foreground">{row.chest}</td>
-                  <td className="py-3 px-2 text-muted-foreground">{row.waist}</td>
-                  <td className="py-3 px-2 text-muted-foreground">{row.length}</td>
+                <tr key={row.size} className="border-b border-border last:border-0 hover:bg-muted/30 transition-colors">
+                  <td className="py-3 px-3 font-semibold">{row.size}</td>
+                  <td className="py-3 px-3 text-muted-foreground">{row.weight}</td>
+                  <td className="py-3 px-3 text-muted-foreground">{row.height}</td>
                 </tr>
               ))}
             </tbody>
@@ -72,8 +67,7 @@ export function SizeGuide() {
         </div>
 
         <p className="text-xs text-muted-foreground mt-4 leading-relaxed">
-          نصيحة: لو كنت بين مقاسين، اختر المقاس الأكبر للحصول على إحساس
-          oversized مريح يتناسب مع روح المجموعة.
+          نصيحة: لو كنت بين مقاسين، اختار المقاس الأكبر للإحساس الـ oversized المريح.
         </p>
       </DialogContent>
     </Dialog>
