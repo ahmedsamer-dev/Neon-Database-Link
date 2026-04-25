@@ -113,12 +113,17 @@ router.post("/orders", async (req, res) => {
     });
   }
 
-  // Fetch shipping cost from store settings
-  const [shippingRow] = await db
-    .select()
-    .from(storeSettingsTable)
-    .where(eq(storeSettingsTable.key, "shipping_cost"));
-  const shippingCost = Number(shippingRow?.value ?? 0);
+  // Fetch shipping cost from store settings (fail-safe)
+  let shippingCost = 0;
+  try {
+    const [shippingRow] = await db
+      .select()
+      .from(storeSettingsTable)
+      .where(eq(storeSettingsTable.key, "shipping_cost"));
+    shippingCost = Number(shippingRow?.value ?? 0);
+  } catch {
+    shippingCost = 0;
+  }
   const grandTotal = total + shippingCost;
 
   // Generate order code
