@@ -10,7 +10,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <footer className="py-14 border-t mt-auto bg-background">
         <div className="container mx-auto px-4 md:px-8 grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
           <div>
-            <h3 className="font-serif font-bold text-xl mb-2">PEACE.</h3>
+            <div className="flex items-center gap-2 mb-2">
+              <img src="/logo.png" alt="PEACE logo" className="h-7 w-7 object-contain" />
+              <h3 className="font-serif font-bold text-xl">PEACE.</h3>
+            </div>
             <p className="text-sm text-muted-foreground">
               Wear the calm. Live with intention.
             </p>
