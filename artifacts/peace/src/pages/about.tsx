@@ -82,7 +82,7 @@ export default function About() {
       </section>
 
       {/* لماذا نحن الأفضل */}
-      <section className="py-24 bg-foreground text-background">
+      <section className="py-24 bg-secondary/50">
         <div className="container mx-auto px-6 md:px-16 max-w-4xl">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -91,9 +91,9 @@ export default function About() {
             transition={{ duration: 0.6 }}
             className="text-center mb-14"
           >
-            <span className="text-xs uppercase tracking-[0.3em] text-background/40 mb-3 block">Why Us</span>
+            <span className="text-xs uppercase tracking-[0.3em] text-muted-foreground mb-3 block">Why Us</span>
             <h2 className="text-3xl font-serif font-bold mb-4 tracking-tight">لماذا نحن الأفضل</h2>
-            <p className="text-background/60 max-w-xl mx-auto">
+            <p className="text-muted-foreground max-w-xl mx-auto">
               ليس مجرد كلام — بل التزام راسخ بكل خطوة من رحلتك معنا
             </p>
           </motion.div>
@@ -112,12 +112,12 @@ export default function About() {
                 viewport={{ once: true, margin: "-40px" }}
                 transition={{ duration: 0.6, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
                 whileHover={{ scale: 1.02, transition: { duration: 0.2 } }}
-                className="flex gap-5 p-6 border border-background/10 rounded-sm hover:bg-background/5 transition-colors duration-200 cursor-default"
+                className="flex gap-5 p-6 border rounded-sm bg-background hover:bg-muted/30 transition-colors duration-200 cursor-default"
               >
                 <div className="flex-shrink-0 text-3xl leading-none mt-1">{item.icon}</div>
                 <div>
-                  <h3 className="font-semibold mb-2 text-background">{item.title}</h3>
-                  <p className="text-background/60 text-sm leading-relaxed">{item.desc}</p>
+                  <h3 className="font-semibold mb-2">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm leading-relaxed">{item.desc}</p>
                 </div>
               </motion.div>
             ))}
