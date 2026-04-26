@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import healthRouter from "./health";
-import productsRouter from "./products";
+import productsRouter from "../modules/products";
 import ordersRouter from "../modules/orders";
 import adminRouter from "./admin";
 import adminProductsRouter from "./admin-products";
