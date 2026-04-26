@@ -4,8 +4,8 @@ import productsRouter from "../modules/products";
 import ordersRouter from "../modules/orders";
 import adminRouter from "./admin";
 import adminProductsRouter from "./admin-products";
-import notificationsRouter from "./notifications";
-import settingsRouter from "./settings";
+import notificationsRouter from "../modules/notifications";
+import settingsRouter from "../modules/settings";
 
 const router: IRouter = Router();
 
