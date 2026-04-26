@@ -2,8 +2,8 @@ import { Router, type IRouter } from "express";
 import healthRouter from "./health";
 import productsRouter from "../modules/products";
 import ordersRouter from "../modules/orders";
-import adminRouter from "./admin";
-import adminProductsRouter from "./admin-products";
+import adminRouter from "../modules/admin";
+import adminProductsRouter from "../modules/admin-products";
 import notificationsRouter from "../modules/notifications";
 import settingsRouter from "../modules/settings";
 

@@ -45,6 +45,33 @@ A production-style e-commerce store for a clothing brand called "Peace" with:
 - `PUT /api/admin/products/:id/variants/:variantId` — update variant
 - `DELETE /api/admin/products/:id/variants/:variantId` — delete variant
 
+## API Server Architecture
+
+The API server (`artifacts/api-server/src/`) follows a layered architecture organized by domain modules:
+
+```
+src/
+├── modules/
+│   ├── orders/             # Public order placement & tracking
+│   ├── products/           # Public product catalog
+│   ├── notifications/      # Admin notifications
+│   ├── settings/           # Public + admin store settings
+│   ├── admin/              # Admin auth, orders, payment confirmation, stats
+│   └── admin-products/     # Admin product/variant CRUD
+├── routes/
+│   ├── health.ts           # Liveness probe
+│   └── index.ts            # Router aggregator
+├── lib/                    # Shared helpers (admin auth, formatters)
+├── server.ts / handler.ts  # Express bootstrap (local + Vercel serverless)
+└── index.ts                # Entry point
+```
+
+Each module follows the same three-layer pattern:
+- `<name>.repository.ts` — Drizzle DB queries only, no business logic
+- `<name>.service.ts` — Business rules; returns discriminated unions (`{ kind: "ok" | "not_found" | ... }`)
+- `<name>.routes.ts` — Express handlers; map service results to HTTP responses
+- `index.ts` — Re-exports the router
+
 ## Key Commands
 
 - `pnpm run typecheck` — full typecheck
