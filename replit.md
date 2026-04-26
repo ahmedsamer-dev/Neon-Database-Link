@@ -62,8 +62,11 @@ src/
 │   ├── health.ts           # Liveness probe
 │   └── index.ts            # Router aggregator
 ├── lib/                    # Shared helpers (admin auth, formatters)
-├── server.ts / handler.ts  # Express bootstrap (local + Vercel serverless)
-└── index.ts                # Entry point
+├── app.ts                  # Express app (middlewares + routes wiring)
+├── cleanup.ts              # Background job: delete cancelled orders > 24h
+├── index.ts                # Local dev entry (listens on PORT)
+├── server.ts               # Vercel serverless entry (re-exports app)
+└── seed.ts                 # Seed script for products
 ```
 
 Each module follows the same three-layer pattern:
